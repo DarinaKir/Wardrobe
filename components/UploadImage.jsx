@@ -7,6 +7,9 @@ import {Cloudinary} from 'cloudinary-core';
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 
+require('dotenv').config();
+
+
 export default function UploadImage() {
     const [facing, setFacing] = useState('back');
     const [photo, setPhoto] = useState(null);
