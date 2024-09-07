@@ -12,7 +12,7 @@ function Wardrobe() {
         const fetchData = async () => {
             try {
                 const response = await axios.get("http://" + serverIp + ":" + port + "/get-outfit-items");
-                setOutfitItems(response.data); // מניחים שהרשימה תגיע במבנה שציינת
+                setOutfitItems(response.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
