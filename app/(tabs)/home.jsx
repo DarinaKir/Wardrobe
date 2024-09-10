@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import {SafeAreaView} from "react-native-safe-area-context";
 
 function Home() {
     return (
-        <View>
+        <SafeAreaView>
             <Text>Home</Text>
             <StatusBar style="auto" />
-        </View>
+        </SafeAreaView>
     );
 }
 

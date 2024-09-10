@@ -6,9 +6,7 @@ import Button from './Button'
 import {Cloudinary} from 'cloudinary-core';
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
-
-require('dotenv').config();
-
+import { OPENAI_API_KEY } from '@env';
 
 export default function UploadImage() {
     const [facing, setFacing] = useState('back');
@@ -100,7 +98,7 @@ export default function UploadImage() {
                 },
                 {
                     headers: {
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`,
                         'Content-Type': 'application/json'
                     }
                 });

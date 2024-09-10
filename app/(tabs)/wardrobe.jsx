@@ -3,21 +3,17 @@ import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, Button, Alert, FlatList} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from "axios";
+import {serverConstants} from '../../constants/serverConstants'
+import {SafeAreaView} from "react-native-safe-area-context";
 
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
-
-    const [isPickerVisible, setPickerVisible] = useState(false);
-    const [selectedOption, setSelectedOption] = useState("");
     const [suggestions, setSuggestions] = useState([]);
-
-    const serverIp = "192.168.238.156";
-    const port = "9128";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://" + serverIp + ":" + port + "/get-outfit-items");
+                const response = await axios.get("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-outfit-items");
                 setOutfitItems(response.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -26,31 +22,9 @@ function Wardrobe() {
         fetchData();
     }, []);
 
-    const predefinedOptions = [
-        { label: 'Vacation', value: 'vacation' },
-        { label: 'Party', value: 'party' },
-        { label: 'Date', value: 'date' },
-        { label: 'Studies', value: 'studies' },
-    ];
-
-    const handleSelectItem = async () => {
-        // Alert.alert("Option selected", `You selected: ${selectedOption}`);
-        // setPickerVisible(false);
-        try {
-            const response = await axios.post("http://" + serverIp + ":" + port + "/get-outfit-suggestions", {
-                occasion: selectedOption
-            });
-            setSuggestions(response.data); // מציג את התוצאה שהשרת החזיר
-            Alert.alert("Suggestions received", `Suggestions: ${JSON.stringify(suggestions)}`);
-        } catch (error) {
-            console.error('Error fetching suggestions:', error);
-            Alert.alert("Error", "Failed to fetch suggestions from the server");
-        }
-
-        setPickerVisible(false);
 
 
-    };
+
 
     const renderItem = ({ item }) => (
         <View style={styles.row}>
@@ -86,26 +60,7 @@ function Wardrobe() {
     // );
 
     return (
-        <View style={styles.container}>
-
-            <Button title="Outfit Suggestion" onPress={() => setPickerVisible(true)} />
-
-            {isPickerVisible && (
-                <View style={styles.pickerContainer}>
-                    <Picker
-                        selectedValue={selectedOption}
-                        onValueChange={(itemValue) => setSelectedOption(itemValue)}
-                        style={styles.picker}
-                    >
-                        <Picker.Item label="Select an item" value="" />
-                        {predefinedOptions.map((option, index) => (
-                            <Picker.Item key={index} label={option.label} value={option.value} />
-                        ))}
-                    </Picker>
-                    <Button title="Submit" onPress={handleSelectItem} />
-                </View>
-            )}
-
+        <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
             <View style={styles.table}>
                 <View style={styles.row}>
@@ -123,7 +78,7 @@ function Wardrobe() {
             </View>
 
             <StatusBar style="auto" />
-        </View>
+        </SafeAreaView>
     );
 }
 

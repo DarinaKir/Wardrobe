@@ -1,13 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import {Text, View } from 'react-native';
+import {SafeAreaView} from "react-native-safe-area-context";
 
 
 function Profile() {
     return (
-        <View>
+        <SafeAreaView>
             <Text>Profile</Text>
             <StatusBar style="auto" />
-        </View>
+        </SafeAreaView>
     );
 }
 

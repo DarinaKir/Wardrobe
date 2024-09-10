@@ -8,10 +8,10 @@ import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import axios from "axios";
 import {errorMessages} from '../../constants/errorMessages'
+import {serverConstants} from '../../constants/serverConstants'
+
 
 const SignIn = () => {
-    const serverIp = "192.168.238.156";
-    const port = "9128";
     const [isSubmitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
         email: "",
@@ -22,7 +22,7 @@ const SignIn = () => {
         if (form.email && form.password) {
             setSubmitting(true);
             try {
-                const response = await axios.post("http://" + serverIp + ":" + port + "/login", null, {
+                const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/login", null, {
                     params: {
                         email: form.email,
                         password: form.password,

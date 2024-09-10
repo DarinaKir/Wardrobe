@@ -7,10 +7,9 @@ import {images} from "../../constants";
 import CustomButton from "../../components/CustomButton";
 import FormField from "../../components/FormField";
 import axios from 'axios';
+import {serverConstants} from '../../constants/serverConstants'
 
 const SignUp = () => {
-    const serverIp = "192.168.238.156";
-    const port = "9128";
     const [isSubmitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
         username: "",
@@ -23,7 +22,7 @@ const SignUp = () => {
         if (form.username && form.email && form.password) {
             setSubmitting(true);
             try {
-                const response = await axios.post(`http://${serverIp}:${port}/sign-up`, null, {
+                const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/sign-up`, null, {
                     params: {
                         username: form.username,
                         email: form.email,
