@@ -9,7 +9,7 @@ import FormField from "../../components/FormField";
 import axios from 'axios';
 
 const SignUp = () => {
-    const serverIp = "192.168.1.145";
+    const serverIp = "192.168.238.156";
     const port = "9128";
     const [isSubmitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
