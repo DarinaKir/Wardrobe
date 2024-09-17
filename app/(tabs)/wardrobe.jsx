@@ -87,12 +87,7 @@ function Wardrobe() {
             {/*    <Text style={styles.buttonText}>Take a photo</Text>*/}
             {/*</TouchableOpacity>*/}
 
-            {/* כפתור לפתיחת ה-Modal */}
-            <View style={styles.centeredButtonContainer}>
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconButton}>
-                    <MaterialIcons name="add-photo-alternate" size={30} color="white" />
-                </TouchableOpacity>
-            </View>
+
 
             {/* Modal עם שני הכפתורים */}
             <Modal
@@ -146,8 +141,12 @@ function Wardrobe() {
                     keyExtractor={(item) => item.id.toString()}
                 />
             </View>
-
             <StatusBar style="auto" />
+
+            {/* כפתור לפתיחת ה-Modal */}
+            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.floatingButton}>
+                <MaterialIcons name="add-photo-alternate" size={24} color="white" />
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
@@ -155,6 +154,7 @@ function Wardrobe() {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
+        flex: 1,
     },
     header: {
         fontSize: 24,
@@ -211,15 +211,17 @@ const styles = StyleSheet.create({
         height: 60,
         marginBottom: 20,
     },
-    iconButton: {
+    floatingButton: {
+        position: 'absolute',
+        bottom: 10,         // מיקום תחתון
+        right: 10,          // מיקום מימין
         backgroundColor: '#007BFF',
-        padding: 10,
-        borderRadius: 10,
+        padding: 20,
+        borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        width: 60,
-        height: 60,
-        marginBottom: 10,
+        elevation: 5,       // הצללה כדי להבליט את הכפתור
+        zIndex: 999,        // תמיד למעלה
     },
     iconButtonSquare: {
         backgroundColor: '#007BFF',
