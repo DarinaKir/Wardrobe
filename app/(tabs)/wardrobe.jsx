@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image } from 'react-native';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -40,6 +39,19 @@ function Wardrobe() {
         }
     };
 
+    // פונקציה לפתיחת המצלמה ולצילום תמונה
+    const takePhoto = async () => {
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+        }
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.row}>
             <Text style={styles.cell}>{item.type}</Text>
@@ -54,9 +66,15 @@ function Wardrobe() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
+
             {/* כפתור מותאם אישית */}
             <TouchableOpacity onPress={pickImage} style={styles.button}>
                 <Text style={styles.buttonText}>Pick an image from gallery</Text>
+            </TouchableOpacity>
+
+            {/* כפתור לצילום תמונה */}
+            <TouchableOpacity onPress={takePhoto} style={styles.button}>
+                <Text style={styles.buttonText}>Take a photo</Text>
             </TouchableOpacity>
 
             {imageUri && (

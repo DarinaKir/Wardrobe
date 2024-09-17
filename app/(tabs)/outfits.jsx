@@ -1,4 +1,4 @@
-import {Alert, Button, StyleSheet, Text, View, TextInput} from 'react-native';
+import {Alert, StyleSheet, Text, View, TextInput} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import React, {useState} from "react";
 import axios from "axios";
@@ -19,8 +19,8 @@ function Outfits() {
             const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-outfit-suggestions", {
                 occasion: selectedOption
             });
-            console.log(response.data)
             setSuggestions(response.data);
+            console.log(suggestions);
             Alert.alert("Suggestions received", `Suggestions: ${JSON.stringify(response.data)}`);
         } catch (error) {
             console.error('Error fetching suggestions:', error);
