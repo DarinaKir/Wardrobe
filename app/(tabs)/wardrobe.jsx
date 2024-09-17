@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Modal} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Modal, Animated } from 'react-native';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -10,8 +10,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
     const [imageUri, setImageUri] = useState(null); // משתנה לשמירת URI של התמונה שנבחרה
-    const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
-
+    // const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
+    const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
+    const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,7 +40,7 @@ function Wardrobe() {
 
         if (!result.canceled) {
             setImageUri(result.assets[0].uri); // שמירת ה-URI של התמונה
-            setModalVisible(false); // סגירת ה-Modal
+            // setModalVisible(false); // סגירת ה-Modal
         }
     };
 
@@ -53,9 +54,23 @@ function Wardrobe() {
 
         if (!result.canceled) {
             setImageUri(result.assets[0].uri);
-            setModalVisible(false);
+            // setModalVisible(false);
         }
     };
+
+    const toggleButtons = () => {
+        setIsExpanded(!isExpanded);
+        Animated.timing(animationValue, {
+            toValue: isExpanded ? 0 : 1, // אם פתוח סוגר ולהיפך
+            duration: 300, // משך האנימציה
+            useNativeDriver: false, // נשתמש במנוע של React Native
+        }).start();
+    };
+
+    const buttonPosition = animationValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -80], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
+    });
 
     // פונקציה למחיקת התמונה
     const deleteImage = () => {
@@ -77,49 +92,50 @@ function Wardrobe() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
 
-            {/*/!* כפתור מותאם אישית *!/*/}
-            {/*<TouchableOpacity onPress={pickImage} style={styles.button}>*/}
-            {/*    <Text style={styles.buttonText}>Pick an image from gallery</Text>*/}
-            {/*</TouchableOpacity>*/}
+            {/*/!* Modal עם שני הכפתורים *!/*/}
+            {/*<Modal*/}
+            {/*    animationType="slide"*/}
+            {/*    transparent={true}*/}
+            {/*    visible={modalVisible}*/}
+            {/*    onRequestClose={() => setModalVisible(false)}*/}
+            {/*>*/}
+            {/*    <View style={styles.modalContainer}>*/}
+            {/*        <View style={styles.modalContent}>*/}
+            {/*            <View style={styles.row}>*/}
+            {/*                <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>*/}
+            {/*                    <MaterialIcons name="photo-library" size={30} color="white" />*/}
+            {/*                </TouchableOpacity>*/}
+            {/*                <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>*/}
+            {/*                    <MaterialIcons name="camera-alt" size={30} color="white" />*/}
+            {/*                </TouchableOpacity>*/}
+            {/*                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.iconButtonSquare}>*/}
+            {/*                    <MaterialIcons name="close" size={30} color="white" />*/}
+            {/*                </TouchableOpacity>*/}
+            {/*            </View>*/}
+            {/*        </View>*/}
+            {/*    </View>*/}
+            {/*</Modal>*/}
 
-            {/*/!* כפתור לצילום תמונה *!/*/}
-            {/*<TouchableOpacity onPress={takePhoto} style={styles.button}>*/}
-            {/*    <Text style={styles.buttonText}>Take a photo</Text>*/}
-            {/*</TouchableOpacity>*/}
 
-
-
-            {/* Modal עם שני הכפתורים */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.row}>
-                            <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>
-                                <MaterialIcons name="photo-library" size={30} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>
-                                <MaterialIcons name="camera-alt" size={30} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.iconButtonSquare}>
-                                <MaterialIcons name="close" size={30} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
+            {/*{imageUri && (*/}
+            {/*    <View style={styles.centeredButtonContainer}>*/}
+            {/*        <Image*/}
+            {/*            source={{ uri: imageUri }}*/}
+            {/*            style={styles.image}*/}
+            {/*            resizeMode="contain" // שימוש ב-resizeMode כדי להציג את כל התמונה*/}
+            {/*        />*/}
+            {/*        <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>*/}
+            {/*            <MaterialIcons name="delete" size={30} color="white" />*/}
+            {/*        </TouchableOpacity>*/}
+            {/*    </View>*/}
+            {/*)}*/}
 
             {imageUri && (
                 <View style={styles.centeredButtonContainer}>
                     <Image
                         source={{ uri: imageUri }}
                         style={styles.image}
-                        resizeMode="contain" // שימוש ב-resizeMode כדי להציג את כל התמונה
+                        resizeMode="contain"
                     />
                     <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
                         <MaterialIcons name="delete" size={30} color="white" />
@@ -143,10 +159,30 @@ function Wardrobe() {
             </View>
             <StatusBar style="auto" />
 
-            {/* כפתור לפתיחת ה-Modal */}
-            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.floatingButton}>
-                <MaterialIcons name="add-photo-alternate" size={24} color="white" />
+            {/*/!* כפתור לפתיחת ה-Modal *!/*/}
+            {/*<TouchableOpacity onPress={() => setModalVisible(true)} style={styles.floatingButton}>*/}
+            {/*    <MaterialIcons name="add-photo-alternate" size={24} color="white" />*/}
+            {/*</TouchableOpacity>*/}
+
+            {/* כפתור בחירת תמונה */}
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: buttonPosition }] }]}>
+                <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>
+                    <MaterialIcons name="photo-library" size={24} color="white" />
+                </TouchableOpacity>
+            </Animated.View>
+
+            {/* כפתור צילום תמונה */}
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateX: buttonPosition }] }]}>
+                <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>
+                    <MaterialIcons name="camera-alt" size={24} color="white" />
+                </TouchableOpacity>
+            </Animated.View>
+
+            {/* הכפתור הראשי */}
+            <TouchableOpacity onPress={toggleButtons} style={styles.floatingButton}>
+                <MaterialIcons name={isExpanded ? "close" : "add-photo-alternate"} size={24} color="white" />
             </TouchableOpacity>
+
         </SafeAreaView>
     );
 }
@@ -155,6 +191,8 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         flex: 1,
+        // justifyContent: 'center',
+        // alignItems: 'center',
     },
     header: {
         fontSize: 24,
@@ -221,7 +259,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 5,       // הצללה כדי להבליט את הכפתור
-        zIndex: 999,        // תמיד למעלה
+        // zIndex: 999,        // תמיד למעלה
     },
     iconButtonSquare: {
         backgroundColor: '#007BFF',
@@ -229,13 +267,18 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        width: 60,
-        height: 60,
+        width: 55,
+        height: 55,
         marginHorizontal: 10, // מרווח בין הכפתורים בשורה
     },
     centeredButtonContainer: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    animatedButton: {
+        position: 'absolute',
+        bottom: 15,
+        right: 5,
     },
 });
 
