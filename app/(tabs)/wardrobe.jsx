@@ -41,6 +41,7 @@ function Wardrobe() {
         if (!result.canceled) {
             setImageUri(result.assets[0].uri); // שמירת ה-URI של התמונה
             // setModalVisible(false); // סגירת ה-Modal
+            toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
 
@@ -55,6 +56,7 @@ function Wardrobe() {
         if (!result.canceled) {
             setImageUri(result.assets[0].uri);
             // setModalVisible(false);
+            toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
 
@@ -67,9 +69,14 @@ function Wardrobe() {
         }).start();
     };
 
-    const buttonPosition = animationValue.interpolate({
+    const libraryButtonPosition = animationValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, -80], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
+        outputRange: [0, -70], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
+    });
+
+    const cameraButtonPosition = animationValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -125], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
     });
 
     // פונקציה למחיקת התמונה
@@ -165,14 +172,14 @@ function Wardrobe() {
             {/*</TouchableOpacity>*/}
 
             {/* כפתור בחירת תמונה */}
-            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: buttonPosition }] }]}>
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: libraryButtonPosition }] }]}>
                 <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>
                     <MaterialIcons name="photo-library" size={24} color="white" />
                 </TouchableOpacity>
             </Animated.View>
 
             {/* כפתור צילום תמונה */}
-            <Animated.View style={[styles.animatedButton, { transform: [{ translateX: buttonPosition }] }]}>
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: cameraButtonPosition }] }]}>
                 <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>
                     <MaterialIcons name="camera-alt" size={24} color="white" />
                 </TouchableOpacity>
@@ -226,19 +233,19 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
     },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        alignItems: 'center',
-        width: '80%',
-    },
+    // modalContainer: {
+    //     flex: 1,
+    //     justifyContent: 'center',
+    //     alignItems: 'center',
+    //     backgroundColor: 'rgba(0,0,0,0.5)',
+    // },
+    // modalContent: {
+    //     backgroundColor: '#fff',
+    //     borderRadius: 10,
+    //     padding: 20,
+    //     alignItems: 'center',
+    //     width: '80%',
+    // },
     deleteButton: {
         backgroundColor: '#FF0000',
         padding: 10,
@@ -267,8 +274,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        width: 55,
-        height: 55,
+        width: 50,
+        height: 50,
         marginHorizontal: 10, // מרווח בין הכפתורים בשורה
     },
     centeredButtonContainer: {
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
     },
     animatedButton: {
         position: 'absolute',
-        bottom: 15,
+        bottom: 10,
         right: 5,
     },
 });
