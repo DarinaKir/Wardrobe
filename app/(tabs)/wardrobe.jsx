@@ -1,14 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, Button, Alert, FlatList} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, FlatList, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
+import * as ImagePicker from 'expo-image-picker';
 
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
-    const [suggestions, setSuggestions] = useState([]);
+    const [imageUri, setImageUri] = useState(null); // משתנה לשמירת URI של התמונה שנבחרה
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,8 +24,21 @@ function Wardrobe() {
     }, []);
 
 
+    // פונקציה לפתיחת גלריה ולבחירת תמונה
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            // allowsEditing: true,
+            // aspect: [4, 3],
+            // quality: 1,
+            allowsEditing: false, // לא מאפשר עריכת התמונה
+            quality: 1, // איכות מלאה
+        });
 
-
+        if (!result.canceled) {
+            setImageUri(result.assets[0].uri); // שמירת ה-URI של התמונה
+        }
+    };
 
     const renderItem = ({ item }) => (
         <View style={styles.row}>
@@ -37,31 +51,22 @@ function Wardrobe() {
 
     );
 
-    // return (
-    //     <View style={styles.container}>
-    //         <Text style={styles.header}>Wardrobe</Text>
-    //         <View style={styles.table}>
-    //             <View style={styles.row}>
-    //                 <Text style={styles.headerCell}>Type</Text>
-    //                 <Text style={styles.headerCell}>Style</Text>
-    //                 <Text style={styles.headerCell}>Color</Text>
-    //                 <Text style={styles.headerCell}>Season</Text>
-    //                 <Text style={styles.headerCell}>Description</Text>
-    //             </View>
-    //             <FlatList
-    //                 data={outfitItems}
-    //                 renderItem={renderItem}
-    //                 keyExtractor={(item) => item.id.toString()}
-    //             />
-    //
-    //         </View>
-    //         <StatusBar style="auto" />
-    //     </View>
-    // );
-
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
+            {/* כפתור מותאם אישית */}
+            <TouchableOpacity onPress={pickImage} style={styles.button}>
+                <Text style={styles.buttonText}>Pick an image from gallery</Text>
+            </TouchableOpacity>
+
+            {imageUri && (
+                <Image
+                    source={{ uri: imageUri }}
+                    style={styles.image}
+                    resizeMode="contain" // שימוש ב-resizeMode כדי להציג את כל התמונה
+                />
+            )}
+
             <View style={styles.table}>
                 <View style={styles.row}>
                     <Text style={styles.headerCell}>Type</Text>
@@ -116,6 +121,24 @@ const styles = StyleSheet.create({
     picker: {
         height: 50,
         width: '100%',
+    },
+    image: {
+        width: '100%',  // התמונה תתפרס על כל הרוחב הזמין
+        height: 300,    // גובה קבוע של 300 פיקסלים (אפשר לשנות בהתאם לצרכים שלך)
+        marginTop: 20,
+        marginBottom: 20,
+    },
+    button: {
+        backgroundColor: '#007BFF',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

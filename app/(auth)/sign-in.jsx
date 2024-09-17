@@ -22,7 +22,7 @@ const SignIn = () => {
         if (form.email && form.password) {
             setSubmitting(true);
             try {
-                const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/login", null, {
+                const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/login`, null, {
                     params: {
                         email: form.email,
                         password: form.password,
