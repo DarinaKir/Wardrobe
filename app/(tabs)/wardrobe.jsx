@@ -69,14 +69,24 @@ function Wardrobe() {
         }).start();
     };
 
-    const libraryButtonPosition = animationValue.interpolate({
+    const libraryButtonPositionY = animationValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, -70], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
+        outputRange: [0, -70],
     });
 
-    const cameraButtonPosition = animationValue.interpolate({
+    const libraryButtonPositionX = animationValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, -125], // זזים 80 פיקסלים כאשר הכפתורים נפתחים
+        outputRange: [0, -5],
+    });
+
+    const cameraButtonPositionY = animationValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -40],
+    });
+
+    const cameraButtonPositionX = animationValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -57],
     });
 
     // פונקציה למחיקת התמונה
@@ -172,14 +182,14 @@ function Wardrobe() {
             {/*</TouchableOpacity>*/}
 
             {/* כפתור בחירת תמונה */}
-            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: libraryButtonPosition }] }]}>
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateX: libraryButtonPositionX }, {translateY: libraryButtonPositionY}] }]}>
                 <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>
                     <MaterialIcons name="photo-library" size={24} color="white" />
                 </TouchableOpacity>
             </Animated.View>
 
             {/* כפתור צילום תמונה */}
-            <Animated.View style={[styles.animatedButton, { transform: [{ translateY: cameraButtonPosition }] }]}>
+            <Animated.View style={[styles.animatedButton, { transform: [{ translateX: cameraButtonPositionX }, {translateY: cameraButtonPositionY}] }]}>
                 <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>
                     <MaterialIcons name="camera-alt" size={24} color="white" />
                 </TouchableOpacity>
@@ -187,7 +197,7 @@ function Wardrobe() {
 
             {/* הכפתור הראשי */}
             <TouchableOpacity onPress={toggleButtons} style={styles.floatingButton}>
-                <MaterialIcons name={isExpanded ? "close" : "add-photo-alternate"} size={24} color="white" />
+                <MaterialIcons name={isExpanded ? "close" : "add-photo-alternate"} size={34} color="white" />
             </TouchableOpacity>
 
         </SafeAreaView>
@@ -261,17 +271,17 @@ const styles = StyleSheet.create({
         bottom: 10,         // מיקום תחתון
         right: 10,          // מיקום מימין
         backgroundColor: '#007BFF',
-        padding: 20,
-        borderRadius: 20,
+        padding: 15,
+        borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 5,       // הצללה כדי להבליט את הכפתור
         // zIndex: 999,        // תמיד למעלה
     },
     iconButtonSquare: {
-        backgroundColor: '#007BFF',
+        backgroundColor: '#469efb',
         padding: 10,
-        borderRadius: 10,
+        borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
         width: 50,
