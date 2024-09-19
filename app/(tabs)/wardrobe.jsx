@@ -95,56 +95,49 @@ function Wardrobe() {
         setImageUri(null);
     };
 
-// // Function to handle sending the URI
-//     const sendImageUri = async () => {
-//         if (!imageUri) {
-//             Alert.alert("No Image", "Please select an image first.");
-//             return;
-//         }
-//         const formData = new FormData();
-//         formData.append('photo', {
-//             uri: imageUri,
-//             type: 'image/jpeg', // Make sure to set the correct MIME type
-//             name: 'photo.jpg', // or whatever name you want
-//         });
-//         setLoading(true);
-//         try {
-//             const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`,{
-//                 uri: imageUri,
-//             });
-//             Alert.alert('Success', 'Image sent successfully!');
-//             Alert.alert(imageUri + ", ");
-//         } catch (error) {
-//             Alert.alert('Error', 'Failed to send the image.');
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-    const sendImage = async () => {
+// Function to handle sending the URI
+    const sendImageUri = async () => {
         if (!imageUri) {
-            Alert.alert('No Image', 'Please select an image first.');
+            Alert.alert("No Image", "Please select an image first.");
             return;
         }
 
-        const formData = new FormData();
-        formData.append('photo', {
-            uri: imageUri,
-            type: 'image/jpeg', // Ensure this matches the actual MIME type
-            name: 'photo.jpg', // Or any name you prefer
-        });
-
+        // setLoading(true);
         try {
-            const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image?uri=`+ imageUri);
             Alert.alert('Success', 'Image sent successfully!');
+            // Alert.alert(imageUri + ", ");
         } catch (error) {
             Alert.alert('Error', 'Failed to send the image.');
+        } finally {
+            // setLoading(false);
         }
     };
+
+    // const sendImage = async () => {
+    //     if (!imageUri) {
+    //         Alert.alert('No Image', 'Please select an image first.');
+    //         return;
+    //     }
+    //
+    //     const formData = new FormData();
+    //     formData.append('photo', {
+    //         uri: imageUri,
+    //         type: 'image/jpeg', // Ensure this matches the actual MIME type
+    //         name: 'photo.jpg', // Or any name you prefer
+    //     });
+    //
+    //     try {
+    //         const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`, formData, {
+    //             headers: {
+    //                 'Content-Type': 'multipart/form-data',
+    //             },
+    //         });
+    //         Alert.alert('Success', 'Image sent successfully!');
+    //     } catch (error) {
+    //         Alert.alert('Error', 'Failed to send the image.');
+    //     }
+    // };
 
     const renderItem = ({ item }) => (
         <View style={styles.row}>
@@ -212,7 +205,7 @@ function Wardrobe() {
                     {/*<TouchableOpacity onPress={sendImageUri} style={styles.button} disabled={loading}>*/}
                     {/*    <Text style={styles.buttonText}>{loading ? 'Sending...' : 'Send'}</Text>*/}
                     {/*</TouchableOpacity>*/}
-                    <TouchableOpacity onPress={sendImage} style={styles.sendButton}>
+                    <TouchableOpacity onPress={sendImageUri} style={styles.sendButton}>
                         <MaterialIcons name="send" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
