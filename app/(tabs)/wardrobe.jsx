@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useRef, useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Modal, Animated } from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Modal, Animated, Alert} from 'react-native';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -13,6 +13,7 @@ function Wardrobe() {
     // const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
     const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
     const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
+    // const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,6 +95,57 @@ function Wardrobe() {
         setImageUri(null);
     };
 
+// // Function to handle sending the URI
+//     const sendImageUri = async () => {
+//         if (!imageUri) {
+//             Alert.alert("No Image", "Please select an image first.");
+//             return;
+//         }
+//         const formData = new FormData();
+//         formData.append('photo', {
+//             uri: imageUri,
+//             type: 'image/jpeg', // Make sure to set the correct MIME type
+//             name: 'photo.jpg', // or whatever name you want
+//         });
+//         setLoading(true);
+//         try {
+//             const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`,{
+//                 uri: imageUri,
+//             });
+//             Alert.alert('Success', 'Image sent successfully!');
+//             Alert.alert(imageUri + ", ");
+//         } catch (error) {
+//             Alert.alert('Error', 'Failed to send the image.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+    const sendImage = async () => {
+        if (!imageUri) {
+            Alert.alert('No Image', 'Please select an image first.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('photo', {
+            uri: imageUri,
+            type: 'image/jpeg', // Ensure this matches the actual MIME type
+            name: 'photo.jpg', // Or any name you prefer
+        });
+
+        try {
+            const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            Alert.alert('Success', 'Image sent successfully!');
+        } catch (error) {
+            Alert.alert('Error', 'Failed to send the image.');
+        }
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.row}>
             <Text style={styles.cell}>{item.type}</Text>
@@ -156,6 +208,12 @@ function Wardrobe() {
                     />
                     <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
                         <MaterialIcons name="delete" size={30} color="white" />
+                    </TouchableOpacity>
+                    {/*<TouchableOpacity onPress={sendImageUri} style={styles.button} disabled={loading}>*/}
+                    {/*    <Text style={styles.buttonText}>{loading ? 'Sending...' : 'Send'}</Text>*/}
+                    {/*</TouchableOpacity>*/}
+                    <TouchableOpacity onPress={sendImage} style={styles.sendButton}>
+                        <MaterialIcons name="send" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
             )}
@@ -296,6 +354,16 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 10,
         right: 5,
+    },
+    sendButton: {
+        backgroundColor: '#28a745', // Choose a color for the send button
+        padding: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 60,
+        height: 60,
+        marginBottom: 20,
     },
 });
 
