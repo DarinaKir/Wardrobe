@@ -27,6 +27,16 @@ function Wardrobe() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        console.log('PhotoUri state updated:', imageUri);
+    }, [imageUri]);
+
+    useEffect(() => {
+        (async () => {
+            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            // setPermission(status === 'granted');
+        })();
+    }, []);
 
     // פונקציה לפתיחת גלריה ולבחירת תמונה
     const pickImage = async () => {
@@ -95,56 +105,36 @@ function Wardrobe() {
         setImageUri(null);
     };
 
-// Function to handle sending the URI
-    const sendImageUri = async () => {
-        if (!imageUri) {
-            Alert.alert("No Image", "Please select an image first.");
-            return;
-        }
-
-        // setLoading(true);
+    const upload = async () => {
+        let formData = new FormData();
+        formData.append('file', { uri: imageUri, type: 'image/png', name: 'photo.png' });
         try {
-            const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image?uri=`+ imageUri);
-            Alert.alert('Success', 'Image sent successfully!');
-            // Alert.alert(imageUri + ", ");
-        } catch (error) {
-            Alert.alert('Error', 'Failed to send the image.');
-        } finally {
-            // setLoading(false);
-        }
-    };
+            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + '/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            const res = response.data;
+            console.log('Image uploaded successfully,URL:', res);
+            Alert.alert("Image uploaded successfully")
 
-    // const sendImage = async () => {
-    //     if (!imageUri) {
-    //         Alert.alert('No Image', 'Please select an image first.');
-    //         return;
-    //     }
-    //
-    //     const formData = new FormData();
-    //     formData.append('photo', {
-    //         uri: imageUri,
-    //         type: 'image/jpeg', // Ensure this matches the actual MIME type
-    //         name: 'photo.jpg', // Or any name you prefer
-    //     });
-    //
-    //     try {
-    //         const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/upload-image`, formData, {
-    //             headers: {
-    //                 'Content-Type': 'multipart/form-data',
-    //             },
-    //         });
-    //         Alert.alert('Success', 'Image sent successfully!');
-    //     } catch (error) {
-    //         Alert.alert('Error', 'Failed to send the image.');
-    //     }
-    // };
+        } catch (error) {
+            if (error.response) {
+                console.log('Server responded with error:', error.response.data);
+            } else if (error.request) {
+                console.log('No response received:', error.request);
+            } else {
+                console.log('Error setting up request:', error.message);
+            }
+        }
+    }
 
     const renderItem = ({ item }) => (
         <View style={styles.row}>
             <Text style={styles.cell}>{item.type}</Text>
             <Text style={styles.cell}>{item.style}</Text>
             <Text style={styles.cell}>{item.color}</Text>
-            <Text style={styles.cell}>{item.season.join(', ')}</Text>
+            <Text style={styles.cell}>{item.season}</Text>
             <Text style={styles.cell}>{item.description}</Text>
         </View>
 
@@ -202,10 +192,7 @@ function Wardrobe() {
                     <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
                         <MaterialIcons name="delete" size={30} color="white" />
                     </TouchableOpacity>
-                    {/*<TouchableOpacity onPress={sendImageUri} style={styles.button} disabled={loading}>*/}
-                    {/*    <Text style={styles.buttonText}>{loading ? 'Sending...' : 'Send'}</Text>*/}
-                    {/*</TouchableOpacity>*/}
-                    <TouchableOpacity onPress={sendImageUri} style={styles.sendButton}>
+                    <TouchableOpacity onPress={upload} style={styles.sendButton}>
                         <MaterialIcons name="send" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
