@@ -10,10 +10,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
     const [imageUri, setImageUri] = useState(null); // משתנה לשמירת URI של התמונה שנבחרה
-    // const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
+    const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
     const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
     const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
-    // const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,15 +30,22 @@ function Wardrobe() {
         console.log('PhotoUri state updated:', imageUri);
     }, [imageUri]);
 
-    useEffect(() => {
-        (async () => {
-            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            // setPermission(status === 'granted');
-        })();
-    }, []);
+    // useEffect(() => {
+    //     (async () => {
+    //         const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //         // setPermission(status === 'granted');
+    //     })();
+    // }, []);
 
     // פונקציה לפתיחת גלריה ולבחירת תמונה
     const pickImage = async () => {
+        // בקשת הרשאות גישה לגלריה
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult.granted === false) {
+            alert("Permission to access camera roll is required!");
+            return;
+        }
+        // פתיחת הגלריה ובחירת תמונה
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             // allowsEditing: true,
@@ -51,7 +57,7 @@ function Wardrobe() {
 
         if (!result.canceled) {
             setImageUri(result.assets[0].uri); // שמירת ה-URI של התמונה
-            // setModalVisible(false); // סגירת ה-Modal
+            setModalVisible(true); // סגירת ה-Modal
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
@@ -66,7 +72,7 @@ function Wardrobe() {
 
         if (!result.canceled) {
             setImageUri(result.assets[0].uri);
-            // setModalVisible(false);
+            setModalVisible(true);
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
@@ -107,16 +113,19 @@ function Wardrobe() {
 
     const upload = async () => {
         let formData = new FormData();
-        formData.append('file', { uri: imageUri, type: 'image/png', name: 'photo.png' });
+        formData.append('file', {uri: imageUri, type: 'image/jpeg', name: 'photo.png'});
+        const url = "http://" + serverConstants.serverIp + ":" + serverConstants.port + "/upload-image";
         try {
-            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + '/upload-image', formData, {
+            const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+
             const res = response.data;
             console.log('Image uploaded successfully,URL:', res);
-            Alert.alert("Image uploaded successfully")
+            Alert.alert("Image uploaded successfully");
+            setImageUri(null);
 
         } catch (error) {
             if (error.response) {
@@ -144,58 +153,31 @@ function Wardrobe() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
 
-            {/*/!* Modal עם שני הכפתורים *!/*/}
-            {/*<Modal*/}
-            {/*    animationType="slide"*/}
-            {/*    transparent={true}*/}
-            {/*    visible={modalVisible}*/}
-            {/*    onRequestClose={() => setModalVisible(false)}*/}
-            {/*>*/}
-            {/*    <View style={styles.modalContainer}>*/}
-            {/*        <View style={styles.modalContent}>*/}
-            {/*            <View style={styles.row}>*/}
-            {/*                <TouchableOpacity onPress={pickImage} style={styles.iconButtonSquare}>*/}
-            {/*                    <MaterialIcons name="photo-library" size={30} color="white" />*/}
-            {/*                </TouchableOpacity>*/}
-            {/*                <TouchableOpacity onPress={takePhoto} style={styles.iconButtonSquare}>*/}
-            {/*                    <MaterialIcons name="camera-alt" size={30} color="white" />*/}
-            {/*                </TouchableOpacity>*/}
-            {/*                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.iconButtonSquare}>*/}
-            {/*                    <MaterialIcons name="close" size={30} color="white" />*/}
-            {/*                </TouchableOpacity>*/}
-            {/*            </View>*/}
-            {/*        </View>*/}
-            {/*    </View>*/}
-            {/*</Modal>*/}
-
-
-            {/*{imageUri && (*/}
-            {/*    <View style={styles.centeredButtonContainer}>*/}
-            {/*        <Image*/}
-            {/*            source={{ uri: imageUri }}*/}
-            {/*            style={styles.image}*/}
-            {/*            resizeMode="contain" // שימוש ב-resizeMode כדי להציג את כל התמונה*/}
-            {/*        />*/}
-            {/*        <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>*/}
-            {/*            <MaterialIcons name="delete" size={30} color="white" />*/}
-            {/*        </TouchableOpacity>*/}
-            {/*    </View>*/}
-            {/*)}*/}
-
             {imageUri && (
-                <View style={styles.centeredButtonContainer}>
-                    <Image
-                        source={{ uri: imageUri }}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
-                    <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
-                        <MaterialIcons name="delete" size={30} color="white" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={upload} style={styles.sendButton}>
-                        <MaterialIcons name="send" size={30} color="white" />
-                    </TouchableOpacity>
-                </View>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Image
+                                source={{ uri: imageUri }}
+                                style={styles.image}
+                                resizeMode="contain"
+                            />
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
+                                    <MaterialIcons name="delete" size={30} color="white" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={upload} style={styles.sendButton}>
+                                    <MaterialIcons name="send" size={30} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             )}
 
             <View style={styles.table}>
@@ -213,11 +195,6 @@ function Wardrobe() {
                 />
             </View>
             <StatusBar style="auto" />
-
-            {/*/!* כפתור לפתיחת ה-Modal *!/*/}
-            {/*<TouchableOpacity onPress={() => setModalVisible(true)} style={styles.floatingButton}>*/}
-            {/*    <MaterialIcons name="add-photo-alternate" size={24} color="white" />*/}
-            {/*</TouchableOpacity>*/}
 
             {/* כפתור בחירת תמונה */}
             <Animated.View style={[styles.animatedButton, { transform: [{ translateX: libraryButtonPositionX }, {translateY: libraryButtonPositionY}] }]}>
@@ -246,8 +223,6 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center',
     },
     header: {
         fontSize: 24,
@@ -263,7 +238,6 @@ const styles = StyleSheet.create({
         padding: 10,
         borderBottomWidth: 1,
         borderColor: '#ddd',
-
         justifyContent: 'center', // הכפתורים יהיו ממורכזים בשורה
     },
     cell: {
@@ -281,19 +255,19 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
     },
-    // modalContainer: {
-    //     flex: 1,
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     backgroundColor: 'rgba(0,0,0,0.5)',
-    // },
-    // modalContent: {
-    //     backgroundColor: '#fff',
-    //     borderRadius: 10,
-    //     padding: 20,
-    //     alignItems: 'center',
-    //     width: '80%',
-    // },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        width: '80%',
+    },
     deleteButton: {
         backgroundColor: '#FF0000',
         padding: 10,
@@ -303,6 +277,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         marginBottom: 20,
+        marginHorizontal: 5,
     },
     floatingButton: {
         position: 'absolute',
@@ -314,7 +289,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 5,       // הצללה כדי להבליט את הכפתור
-        // zIndex: 999,        // תמיד למעלה
     },
     iconButtonSquare: {
         backgroundColor: '#469efb',
@@ -325,10 +299,6 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         marginHorizontal: 10, // מרווח בין הכפתורים בשורה
-    },
-    centeredButtonContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     animatedButton: {
         position: 'absolute',
@@ -344,6 +314,13 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         marginBottom: 20,
+        marginHorizontal: 5,
+    },
+    buttonContainer: {
+        flexDirection: 'row', // ודא שהכפתורים יהיו בשורה
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 20, // רווח מעל הכפתורים
     },
 });
 
