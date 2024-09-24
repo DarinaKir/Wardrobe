@@ -1,12 +1,12 @@
 import {CameraView, useCameraPermissions} from 'expo-camera';
 import {useState, useRef, useEffect} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
-import {FaBeer} from 'react-icons/fa';
-import Button from './Button'
+import {StyleSheet, Text, TouchableOpacity, View, Image, Alert} from 'react-native';
+import Button from '../components/Button'
 import {Cloudinary} from 'cloudinary-core';
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
-import { OPENAI_API_KEY } from '@env';
+import {serverConstants} from "../constants/serverConstants";
+import {useGlobalContext} from "../app/contex/globalProvider";
 
 export default function UploadImage() {
     const [facing, setFacing] = useState('back');
@@ -15,6 +15,7 @@ export default function UploadImage() {
     const [photoUri, setPhotoUri] = useState(null)
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef(null);
+    const {user} = useGlobalContext();
 
 
     const cloudinary = new Cloudinary({cloud_name: 'dcfqbqckg', secure: true});
@@ -44,71 +45,38 @@ export default function UploadImage() {
             setPhoto(data.uri);
 
 
-            // uploadImage(data.uri);
+            // await upload(data.uri);
+
+            // await callOpenAI("https://i.imgur.com/Mpuz5xM.jpeg")
         } catch (error) {
             console.log(error);
         }
     };
-
-    const uploadImage = async () => {
-        console.log("photo:    ")
-        const formData = new FormData();
-        formData.append('file', {uri: photo, name: 'photo.jpg', type: 'image/jpeg'});
-        formData.append('upload_preset', 'ml_default');
-
+    const upload = async (imageUri) => {
+        console.log("userId: " + user.id)
+        let formData = new FormData();
+        formData.append('file', { uri: imageUri, type: 'image/png', name: 'photo.png' });
+        formData.append('userId', user.id.toString());
         try {
-            const response = await axios.post(`https://api.cloudinary.com/v1_1/dcfqbqckg/image/upload`, formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
-            // console.log(response.data);
-            console.log("response.data.secure_url:    " + response.data.secure_url)
-            if (response.data.secure_url){
-                callOpenAI(response.data.secure_url);
-            }
+            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + '/upload-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            const res = response.data;
+            console.log('Image uploaded successfully,URL:', res);
+            Alert.alert("Image uploaded successfully")
+
         } catch (error) {
-            console.error('Error uploading image:', error);
+            if (error.response) {
+                console.log('Server responded with error:', error.response.data);
+            } else if (error.request) {
+                console.log('No response received:', error.request);
+            } else {
+                console.log('Error setting up request:', error.message);
+            }
         }
     }
-
-    const callOpenAI = async (uri) => {
-        console.log("openAI")
-        try {
-            const res = await axios.post('https://api.openai.com/v1/chat/completions',
-                {
-                    model:"gpt-4o",
-                    messages:[
-                        {
-                            role: "user",
-                            content: [
-                                {type: "text", text: "return JSON with the features for the image: type(shirt,pants...),style(elegant...),color,season"},
-                                {
-                                    type: "image_url",
-                                    image_url: {
-                                        url: uri.toString(),
-                                    },
-                                },
-                            ],
-                        }
-                    ],
-                    max_tokens: 50
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            // console.log(res)
-            console.log("openAI:   " + res.data.choices[0].message.content);
-            setUploadResult(res.data.choices[0].message.content);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
 
     if (!permission) {
@@ -145,7 +113,7 @@ export default function UploadImage() {
                     : (
                         <View style={{alignItems: 'center', justifyContent: 'center'}}>
                             <Image source={{uri: photo}} style={{width: 300, height: 600}}/>
-                            <Button title="Upload" onPress={uploadImage}/>
+                            <Button title="Upload" onPress={() => upload(photo)}/>
                             <Button title="Retake" onPress={() => setPhoto(null)}/>
                         </View>
                     )
@@ -183,4 +151,4 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'white',
     },
-});
+})

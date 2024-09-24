@@ -9,6 +9,7 @@ import FormField from "../../components/FormField";
 import axios from "axios";
 import {errorMessages} from '../../constants/errorMessages'
 import {serverConstants} from '../../constants/serverConstants'
+import {useGlobalContext} from "../contex/globalProvider";
 
 
 const SignIn = () => {
@@ -17,6 +18,7 @@ const SignIn = () => {
         email: "",
         password: "",
     });
+    const { setUser, setIsLogged } = useGlobalContext();
 
     const submit = async () => {
         if (form.email && form.password) {
@@ -32,6 +34,8 @@ const SignIn = () => {
                 console.log(response.data);
 
                 if (response.data.success) {
+                    setUser(response.data.user);
+                    setIsLogged(true);
                     router.replace("/home");
                 } else {
                     if (errorMessages[response.data.errorCode]) {

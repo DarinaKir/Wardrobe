@@ -7,6 +7,11 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import {useGlobalContext} from "../contex/globalProvider";
+import {useNavigation, useRouter} from "expo-router";
+import {Cloudinary} from "cloudinary-core";
+
+
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
     const [imageUri, setImageUri] = useState(null); // משתנה לשמירת URI של התמונה שנבחרה
@@ -14,10 +19,37 @@ function Wardrobe() {
     const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
     const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
 
+    const [suggestions, setSuggestions] = useState([]);
+    const navigation = useNavigation();
+    const router = useRouter();
+    const {user} = useGlobalContext();
+
+    // const [facing, setFacing] = useState('back');
+    // const [photo, setPhoto] = useState(null);
+    // const [uploadResult, setUploadResult] = useState(null);
+    // const [photoUri, setPhotoUri] = useState(null)
+    // const [permission, requestPermission] = useCameraPermissions();
+    // const cameraRef = useRef(null);
+
+
+    const cloudinary = new Cloudinary({cloud_name: 'dcfqbqckg', secure: true});
+
+
+
+
     useEffect(() => {
+
+        if (!user) {
+            console.log('User is not logged in yet');
+            return;
+        }
+
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-outfit-items");
+                const response = await axios.post(
+                    "http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-user-clothes",null,
+                    { params: {userId: user.id.toString()} }
+                );
                 setOutfitItems(response.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -26,16 +58,24 @@ function Wardrobe() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        console.log('PhotoUri state updated:', imageUri);
-    }, [imageUri]);
+    const renderItem = ({ item }) => (
+        <Image
+            key={item.id}
+            source={{ uri: "https://i.imgur.com/" + item.name + ".jpeg" }}
+            style={styles.image}
+        />
+    );
 
     // useEffect(() => {
-    //     (async () => {
-    //         const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //         // setPermission(status === 'granted');
-    //     })();
-    // }, []);
+    //     console.log('PhotoUri state updated:', imageUri);
+    // }, [imageUri]);
+
+    useEffect(() => {
+        (async () => {
+            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            // setPermission(status === 'granted');
+        })();
+    }, []);
 
     // פונקציה לפתיחת גלריה ולבחירת תמונה
     const pickImage = async () => {
@@ -52,7 +92,7 @@ function Wardrobe() {
             // aspect: [4, 3],
             // quality: 1,
             allowsEditing: false, // לא מאפשר עריכת התמונה
-            quality: 1, // איכות מלאה
+            quality: 0.1, // איכות מלאה
         });
 
         if (!result.canceled) {
@@ -74,7 +114,7 @@ function Wardrobe() {
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
-            quality: 1,
+            quality: 0.3,
         });
 
         if (!result.canceled) {
@@ -119,20 +159,20 @@ function Wardrobe() {
     };
 
     const upload = async () => {
+        console.log("userId: " + user.id)
         let formData = new FormData();
-        formData.append('file', {uri: imageUri, type: 'image/jpeg', name: 'photo.png'});
-        const url = "http://" + serverConstants.serverIp + ":" + serverConstants.port + "/upload-image";
+        formData.append('file', { uri: imageUri, type: 'image/jpeg', name: 'photo.png' });
+        formData.append('userId', user.id.toString());
         try {
-            const response = await axios.post(url, formData, {
+            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + '/upload-image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
+                timeout: 10000, // הגדר זמן המתנה ל-10 שניות (10000 מילישניות)
             });
-
             const res = response.data;
             console.log('Image uploaded successfully,URL:', res);
-            Alert.alert("Image uploaded successfully");
-            setImageUri(null);
+            Alert.alert("Image uploaded successfully")
 
         } catch (error) {
             if (error.response) {
@@ -145,16 +185,16 @@ function Wardrobe() {
         }
     }
 
-    const renderItem = ({ item }) => (
-        <View style={styles.row}>
-            <Text style={styles.cell}>{item.type}</Text>
-            <Text style={styles.cell}>{item.style}</Text>
-            <Text style={styles.cell}>{item.color}</Text>
-            <Text style={styles.cell}>{item.season}</Text>
-            <Text style={styles.cell}>{item.description}</Text>
-        </View>
-
-    );
+    // const renderItem = ({ item }) => (
+    //     <View style={styles.row}>
+    //         <Text style={styles.cell}>{item.type}</Text>
+    //         <Text style={styles.cell}>{item.style}</Text>
+    //         <Text style={styles.cell}>{item.color}</Text>
+    //         <Text style={styles.cell}>{item.season}</Text>
+    //         <Text style={styles.cell}>{item.description}</Text>
+    //     </View>
+    //
+    // );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -187,20 +227,13 @@ function Wardrobe() {
                 </Modal>
             )}
 
-            <View style={styles.table}>
-                <View style={styles.row}>
-                    <Text style={styles.headerCell}>Type</Text>
-                    <Text style={styles.headerCell}>Style</Text>
-                    <Text style={styles.headerCell}>Color</Text>
-                    <Text style={styles.headerCell}>Season</Text>
-                    <Text style={styles.headerCell}>Description</Text>
-                </View>
-                <FlatList
-                    data={outfitItems}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id.toString()}
-                />
-            </View>
+            <FlatList
+                data={outfitItems}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id.toString()}
+                numColumns={2} // To display two images per row
+                contentContainerStyle={styles.imageList}
+            />
             <StatusBar style="auto" />
 
             {/* כפתור בחירת תמונה */}
@@ -328,6 +361,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
         marginTop: 20, // רווח מעל הכפתורים
+    },
+    imageList:{
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
