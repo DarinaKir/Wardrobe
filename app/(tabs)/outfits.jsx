@@ -20,13 +20,15 @@ function Outfits() {
                 occasion: selectedOption
             });
             setSuggestions(response.data);
-            console.log(suggestions);
+            //console.log(suggestions);
             Alert.alert("Suggestions received", `Suggestions: ${JSON.stringify(response.data)}`);
+
         } catch (error) {
             console.error('Error fetching suggestions:', error);
             Alert.alert("Error", "Failed to fetch suggestions from the server");
         }
     };
+
     return (
         <SafeAreaView style={styles.container}>
 

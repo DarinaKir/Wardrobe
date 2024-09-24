@@ -64,6 +64,13 @@ function Wardrobe() {
 
     // פונקציה לפתיחת המצלמה ולצילום תמונה
     const takePhoto = async () => {
+        const cameraPermissionResult = await ImagePicker.requestCameraPermissionsAsync();
+        if (cameraPermissionResult.granted === false) {
+            alert("You've denied access to the camera.");
+            return;
+        }
+
+
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,

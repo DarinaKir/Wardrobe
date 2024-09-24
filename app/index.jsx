@@ -11,7 +11,6 @@ function Welcome() {
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
                 <View style={styles.innerContainer}>
-
                     <Image
                         source={images.logo}
                         resizeMode="contain"
