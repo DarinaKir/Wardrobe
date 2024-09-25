@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { FlatList, Image, StyleSheet, View, Modal, TouchableOpacity } from 'react-native';
+import {FlatList, Image, StyleSheet, View, Modal, TouchableOpacity, Alert} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from "axios";
+import {serverConstants} from "../constants/serverConstants";
 
-const ImageList = ({ outfitItems }) => {
+const ImageList = ({ outfitItems, setOutfitItems }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const numColumns = 4; // Number of columns
@@ -47,9 +49,49 @@ const ImageList = ({ outfitItems }) => {
         </TouchableOpacity>
     );
 
+    const confirmDelete = () => {
+        Alert.alert(
+            'Confirm Deletion',
+            'Are you sure you want to delete this image?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: handleDelete,
+                },
+            ]
+        );
+    };
+
+    const handleDelete = async () => {
+        try {
+            const imageId = outfitItems[selectedImageIndex].id;
+
+            // Make the API call to delete the image
+            const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/delete-image`, {
+                    imageId: imageId
+            });
+
+            if (response.status === 200) {
+                // Successfully deleted, close the modal and refresh the list
+                closeModal();
+                // Filter out the deleted item from the list
+                const updatedItems = outfitItems.filter(item => item.id !== imageId);
+                setOutfitItems(updatedItems); // Set new state
+            } else {
+                console.error('Failed to delete the image');
+            }
+        } catch (error) {
+            console.error('Error during deletion:', error.response ? error.response.data : error.message);
+        }
+    };
 
     return (
-        <View>
+        <View style={{alignItems: 'center', justifyContent: 'center'}}>
             <FlatList
                 key={numColumns} // Add key prop based on numColumns
                 data={outfitItems}
@@ -73,9 +115,14 @@ const ImageList = ({ outfitItems }) => {
                         />
                     )}
 
+                    {/* Delete Button */}
+                    <TouchableOpacity style={styles.deleteButton} onPress={confirmDelete}>
+                        <MaterialIcons name="delete" size={40} color="red" />
+                    </TouchableOpacity>
+
                     <View style={styles.navigationContainer}>
                         <View style={styles.arrowContainer}>
-                            <View style={styles.arrowButton}>
+                            <View style={selectedImageIndex > 0 ? styles.arrowButton : {}}>
                                 {selectedImageIndex > 0 && (
                                     <TouchableOpacity onPress={goToPreviousImage}>
                                         <MaterialIcons name="arrow-back" size={40} color="white" />
@@ -83,7 +130,7 @@ const ImageList = ({ outfitItems }) => {
                                 )}
                             </View>
 
-                            <View style={styles.arrowButton}>
+                            <View style={selectedImageIndex < outfitItems.length - 1 ? styles.arrowButton : {}}>
                                 {selectedImageIndex < outfitItems.length - 1 && (
                                     <TouchableOpacity onPress={goToNextImage}>
                                         <MaterialIcons name="arrow-forward" size={40} color="white" />
@@ -100,13 +147,21 @@ const ImageList = ({ outfitItems }) => {
 
 const styles = StyleSheet.create({
     image: {
-        width: 80,
-        height: 80,
-        margin: 3,
+        aspectRatio: 1, // יחס 1:1
+        width: '22%',
+        height: 78,
+        margin: 1,
+        borderRadius: 10, // עיגול פינות
+        borderWidth: 2,
+        borderColor: '#ddd', // מסגרת בהירה
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 4,
     },
     imageList: {
-        justifyContent: 'center',
-        alignItems: 'center',
+        // justifyContent: 'center',
+        alignItems: 'flex-start',
     },
     modalContainer: {
         flex: 1,
@@ -117,6 +172,7 @@ const styles = StyleSheet.create({
     fullImage: {
         width: '90%',
         height: '70%',
+        borderRadius: 15, // עיגול פינות לתמונה במודל
     },
     closeButton: {
         position: 'absolute',
@@ -137,8 +193,16 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     arrowButton: {
-        width: 60, // הגדר רוחב קבוע עבור הכפתורים
+        width: 60,
         alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#fff', // חצים על רקע בהיר
+        borderRadius: 30, // עיגול לפינות הכפתור
+        opacity: 0.8,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 1, height: 2 },
+        shadowRadius: 3,
     },
 });
 

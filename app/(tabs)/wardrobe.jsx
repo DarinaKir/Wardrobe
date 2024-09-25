@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useRef, useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, Image, Modal, Animated, Alert} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Image, Modal, Animated, ActivityIndicator, Alert} from 'react-native';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -24,6 +24,9 @@ function Wardrobe() {
 
     const {user} = useGlobalContext();
 
+    const [isLoading, setIsLoading] = useState(false); // מצב טעינה להצגת התמונה
+    const [isUploading, setIsUploading] = useState(false); // מצב טעינה להעלאת התמונה
+
     useEffect(() => {
 
         const fetchData = async () => {
@@ -40,13 +43,13 @@ function Wardrobe() {
         fetchData();
     }, [imageUri]);
 
-    const renderItem = ({ item }) => (
-        <Image
-            key={item.id}
-            source={{ uri: "https://i.imgur.com/" + item.name + ".jpeg" }}
-            style={styles.image}
-        />
-    );
+    // const renderItem = ({ item }) => (
+    //     <Image
+    //         key={item.id}
+    //         source={{ uri: "https://i.imgur.com/" + item.name + ".jpeg" }}
+    //         style={styles.image}
+    //     />
+    // );
 
     // useEffect(() => {
     //     (async () => {
@@ -89,18 +92,18 @@ function Wardrobe() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             // allowsEditing: true,
             // aspect: [4, 3],
-            // quality: 1,
             allowsEditing: false, // לא מאפשר עריכת התמונה
             quality: 1,
         });
 
         if (!result.canceled) {
+            setModalVisible(true);
+            setIsLoading(true); // התחלת טעינה
             // דחיסת התמונה ושינוי האיכות שלה ל-2MB או פחות
             const { uri, size } = await reduceImageSize(result.assets[0].uri);
-
             console.log(`Final image size: ${size} bytes`); // הדפסה של הגודל הסופי
             setImageUri(uri);
-            setModalVisible(true);
+            setIsLoading(false); // סיום טעינה
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
@@ -121,12 +124,13 @@ function Wardrobe() {
         });
 
         if (!result.canceled) {
+            setModalVisible(true);
+            setIsLoading(true); // התחלת טעינה
             // דחיסת התמונה ושינוי האיכות שלה ל-2MB או פחות
             const { uri, size } = await reduceImageSize(result.assets[0].uri);
-
             console.log(`Final image size: ${size} bytes`); // הדפסה של הגודל הסופי
             setImageUri(uri);
-            setModalVisible(true);
+            setIsLoading(false); // סיום טעינה
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
@@ -162,10 +166,12 @@ function Wardrobe() {
 
     // פונקציה למחיקת התמונה
     const deleteImage = () => {
+        setModalVisible(false);
         setImageUri(null);
     };
 
     const upload = async () => {
+        setIsUploading(true); // התחלת טעינה בעת ההעלאה
         console.log("userId: " + user.id)
         let formData = new FormData();
         formData.append('file', { uri: imageUri, type: 'image/jpeg', name: 'photo.png' });
@@ -179,10 +185,11 @@ function Wardrobe() {
             const res = response.data;
             setModalVisible(false);
             setImageUri(null);
-
+            setIsUploading(false); // סיום טעינה
             console.log('Image uploaded successfully,URL:', res);
             Alert.alert("Image uploaded successfully");
         } catch (error) {
+            setIsUploading(false); // סיום טעינה
             if (error.response) {
                 console.log('Server responded with error:', error.response.data);
             } else if (error.request) {
@@ -197,7 +204,7 @@ function Wardrobe() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
 
-            {imageUri && (
+            {modalVisible && (
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -206,26 +213,44 @@ function Wardrobe() {
                 >
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Image
-                                source={{ uri: imageUri }}
-                                style={styles.modalImage}
-                                resizeMode="contain"
-                            />
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
-                                    <MaterialIcons name="delete" size={30} color="white" />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={upload} style={styles.sendButton}>
-                                    <MaterialIcons name="send" size={30} color="white" />
-                                </TouchableOpacity>
-                            </View>
+                            {isLoading ? (
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#565867"
+                                    style={[styles.loader, { transform: [{ scale: 1.5 }] }]} // כאן מוגדל האייקון
+                                />
+                            ) : (
+                                <>
+                                    <Image
+                                        source={{ uri: imageUri }}
+                                        style={styles.modalImage}
+                                        resizeMode="contain"
+                                    />
+                                    {isUploading ? (
+                                        <ActivityIndicator
+                                            size="large"
+                                            color="#565867"
+                                            style={[{ transform: [{ scale: 1.2 }] }]} // גם כאן האייקון מוגדל
+                                        />
+                                    ) : (
+                                        <View style={styles.buttonContainer}>
+                                            <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>
+                                                <MaterialIcons name="delete" size={30} color="white" />
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={upload} style={styles.saveButton}>
+                                                <MaterialIcons name="save" size={30} color="white" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </>
+                            )}
                         </View>
                     </View>
                 </Modal>
             )}
 
             {/* Use the ImageList component */}
-            <ImageList outfitItems={outfitItems} />
+            <ImageList outfitItems={outfitItems} setOutfitItems={setOutfitItems} />
             <StatusBar style="auto" />
 
             {/* כפתור בחירת תמונה */}
@@ -301,7 +326,7 @@ const styles = StyleSheet.create({
         width: '80%',
     },
     deleteButton: {
-        backgroundColor: '#FF0000',
+        backgroundColor: '#565867',
         padding: 10,
         borderRadius: 10,
         alignItems: 'center',
@@ -315,7 +340,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 10,         // מיקום תחתון
         right: 10,          // מיקום מימין
-        backgroundColor: '#007BFF',
+        backgroundColor: '#8354bf',
         padding: 15,
         borderRadius: 30,
         alignItems: 'center',
@@ -323,7 +348,7 @@ const styles = StyleSheet.create({
         elevation: 5,       // הצללה כדי להבליט את הכפתור
     },
     iconButtonSquare: {
-        backgroundColor: '#469efb',
+        backgroundColor: '#a96cf8',
         padding: 10,
         borderRadius: 30,
         alignItems: 'center',
@@ -337,8 +362,8 @@ const styles = StyleSheet.create({
         bottom: 10,
         right: 5,
     },
-    sendButton: {
-        backgroundColor: '#28a745', // Choose a color for the send button
+    saveButton: {
+        backgroundColor: '#899fe1', // Choose a color for the send button
         padding: 10,
         borderRadius: 10,
         alignItems: 'center',
@@ -353,6 +378,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
         marginTop: 20, // רווח מעל הכפתורים
+    },
+    loader: {
+        marginBottom: 20,
     },
 });
 
