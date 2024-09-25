@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useRef, useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Modal, Animated, Alert} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Image, Modal, Animated, Alert} from 'react-native';
 import axios from "axios";
 import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -8,8 +8,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import {useGlobalContext} from "../contex/globalProvider";
-import {useNavigation, useRouter} from "expo-router";
-import {Cloudinary} from "cloudinary-core";
+
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
+import ImageList from "../../components/ImageList";
+
 
 
 function Wardrobe() {
@@ -19,30 +22,9 @@ function Wardrobe() {
     const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
     const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
 
-    const [suggestions, setSuggestions] = useState([]);
-    const navigation = useNavigation();
-    const router = useRouter();
     const {user} = useGlobalContext();
 
-    // const [facing, setFacing] = useState('back');
-    // const [photo, setPhoto] = useState(null);
-    // const [uploadResult, setUploadResult] = useState(null);
-    // const [photoUri, setPhotoUri] = useState(null)
-    // const [permission, requestPermission] = useCameraPermissions();
-    // const cameraRef = useRef(null);
-
-
-    const cloudinary = new Cloudinary({cloud_name: 'dcfqbqckg', secure: true});
-
-
-
-
     useEffect(() => {
-
-        if (!user) {
-            console.log('User is not logged in yet');
-            return;
-        }
 
         const fetchData = async () => {
             try {
@@ -56,7 +38,7 @@ function Wardrobe() {
             }
         };
         fetchData();
-    }, []);
+    }, [imageUri]);
 
     const renderItem = ({ item }) => (
         <Image
@@ -67,15 +49,32 @@ function Wardrobe() {
     );
 
     // useEffect(() => {
-    //     console.log('PhotoUri state updated:', imageUri);
-    // }, [imageUri]);
+    //     (async () => {
+    //         const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //         // setPermission(status === 'granted');
+    //     })();
+    // }, []);
 
-    useEffect(() => {
-        (async () => {
-            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            // setPermission(status === 'granted');
-        })();
-    }, []);
+    // פונקציה להפחתת גודל התמונה כך שתהיה קרובה ל-2MB
+    const reduceImageSize = async (uri) => {
+        const targetSize = 2 * 1024 * 1024; // 2MB בבתים
+        let quality = 1; // להתחיל באיכות מלאה
+        let imageInfo = await FileSystem.getInfoAsync(uri);
+
+        // לולאה להקטנת איכות התמונה עד לגודל הקרוב ל-2MB
+        while (imageInfo.size > targetSize && quality > 0.1) {
+            quality -= 0.1;
+            const manipResult = await ImageManipulator.manipulateAsync(
+                uri,
+                [], // אין צורך בשינוי רזולוציה בשלב זה
+                { compress: quality } // דחיסת התמונה
+            );
+            imageInfo = await FileSystem.getInfoAsync(manipResult.uri);
+            uri = manipResult.uri;
+        }
+
+        return { uri, size: imageInfo.size };
+    };
 
     // פונקציה לפתיחת גלריה ולבחירת תמונה
     const pickImage = async () => {
@@ -92,12 +91,16 @@ function Wardrobe() {
             // aspect: [4, 3],
             // quality: 1,
             allowsEditing: false, // לא מאפשר עריכת התמונה
-            quality: 0.1, // איכות מלאה
+            quality: 1,
         });
 
         if (!result.canceled) {
-            setImageUri(result.assets[0].uri); // שמירת ה-URI של התמונה
-            setModalVisible(true); // סגירת ה-Modal
+            // דחיסת התמונה ושינוי האיכות שלה ל-2MB או פחות
+            const { uri, size } = await reduceImageSize(result.assets[0].uri);
+
+            console.log(`Final image size: ${size} bytes`); // הדפסה של הגודל הסופי
+            setImageUri(uri);
+            setModalVisible(true);
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
     };
@@ -114,11 +117,15 @@ function Wardrobe() {
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
-            quality: 0.3,
+            quality: 1,
         });
 
         if (!result.canceled) {
-            setImageUri(result.assets[0].uri);
+            // דחיסת התמונה ושינוי האיכות שלה ל-2MB או פחות
+            const { uri, size } = await reduceImageSize(result.assets[0].uri);
+
+            console.log(`Final image size: ${size} bytes`); // הדפסה של הגודל הסופי
+            setImageUri(uri);
             setModalVisible(true);
             toggleButtons(); // סגירת הכפתורים לאחר בחירת התמונה
         }
@@ -168,12 +175,13 @@ function Wardrobe() {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
-                timeout: 10000, // הגדר זמן המתנה ל-10 שניות (10000 מילישניות)
             });
             const res = response.data;
-            console.log('Image uploaded successfully,URL:', res);
-            Alert.alert("Image uploaded successfully")
+            setModalVisible(false);
+            setImageUri(null);
 
+            console.log('Image uploaded successfully,URL:', res);
+            Alert.alert("Image uploaded successfully");
         } catch (error) {
             if (error.response) {
                 console.log('Server responded with error:', error.response.data);
@@ -184,17 +192,6 @@ function Wardrobe() {
             }
         }
     }
-
-    // const renderItem = ({ item }) => (
-    //     <View style={styles.row}>
-    //         <Text style={styles.cell}>{item.type}</Text>
-    //         <Text style={styles.cell}>{item.style}</Text>
-    //         <Text style={styles.cell}>{item.color}</Text>
-    //         <Text style={styles.cell}>{item.season}</Text>
-    //         <Text style={styles.cell}>{item.description}</Text>
-    //     </View>
-    //
-    // );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -211,7 +208,7 @@ function Wardrobe() {
                         <View style={styles.modalContent}>
                             <Image
                                 source={{ uri: imageUri }}
-                                style={styles.image}
+                                style={styles.modalImage}
                                 resizeMode="contain"
                             />
                             <View style={styles.buttonContainer}>
@@ -227,13 +224,8 @@ function Wardrobe() {
                 </Modal>
             )}
 
-            <FlatList
-                data={outfitItems}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id.toString()}
-                numColumns={2} // To display two images per row
-                contentContainerStyle={styles.imageList}
-            />
+            {/* Use the ImageList component */}
+            <ImageList outfitItems={outfitItems} />
             <StatusBar style="auto" />
 
             {/* כפתור בחירת תמונה */}
@@ -289,7 +281,7 @@ const styles = StyleSheet.create({
         padding: 5,
         fontWeight: 'bold',
     },
-    image: {
+    modalImage: {
         width: '100%',  // התמונה תתפרס על כל הרוחב הזמין
         height: 300,    // גובה קבוע של 300 פיקסלים (אפשר לשנות בהתאם לצרכים שלך)
         marginTop: 20,
@@ -361,10 +353,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
         marginTop: 20, // רווח מעל הכפתורים
-    },
-    imageList:{
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });
 

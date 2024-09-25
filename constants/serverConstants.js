@@ -1,4 +1,4 @@
 export const serverConstants = {
-    serverIp: "10.100.102.20",
+    serverIp: "192.168.42.156",
     port:"9128",
 };
