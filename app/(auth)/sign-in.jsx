@@ -16,8 +16,14 @@ const SignIn = () => {
     const {user, setUser} = useGlobalContext();
     const [isSubmitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
-        email: "Tehila1355@gmail.com",
-        password: "123",
+        // email: "Tehila1355@gmail.com",
+        // password: "12345678",
+
+        // email: "dasha23kir@gmail.com",
+        // password: "Aa123456",
+
+        email: "",
+        password: "",
     });
 
     useEffect(() => {

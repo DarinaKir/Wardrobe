@@ -6,7 +6,7 @@ import {Cloudinary} from 'cloudinary-core';
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import {serverConstants} from "../constants/serverConstants";
-import {useGlobalContext} from "../app/contex/globalProvider";
+import {useGlobalContext} from "../context/GlobalProvider";
 
 export default function UploadImage() {
     const [facing, setFacing] = useState('back');

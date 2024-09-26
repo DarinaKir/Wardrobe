@@ -6,12 +6,12 @@ import {serverConstants} from '../../constants/serverConstants'
 import {SafeAreaView} from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
-
 import {useGlobalContext} from "../../context/GlobalProvider";
-
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import ImageList from "../../components/ImageList";
+import OutfitFilter from "../../components/OutfitFilter";
+import RefreshButton from "../../components/RefreshButton";
 
 
 
@@ -21,11 +21,15 @@ function Wardrobe() {
     const [modalVisible, setModalVisible] = useState(false); // משתנה לניהול מצב התצוגה של ה-Modal
     const [isExpanded, setIsExpanded] = useState(false); // ניהול מצב הרחבת הכפתורים
     const animationValue = useRef(new Animated.Value(0)).current; // ערך האנימציה
-
     const {user} = useGlobalContext();
-
     const [isLoading, setIsLoading] = useState(false); // מצב טעינה להצגת התמונה
     const [isUploading, setIsUploading] = useState(false); // מצב טעינה להעלאת התמונה
+    const [filteredItems, setFilteredItems] = useState(outfitItems);
+    const filterRef = useRef(null); // יצירת רפרנס ל-OutfitFilter
+
+    const handleFilter = (filteredItems) => {
+        setFilteredItems(filteredItems);
+    };
 
     useEffect(() => {
 
@@ -43,20 +47,12 @@ function Wardrobe() {
         fetchData();
     }, [imageUri]);
 
-    // const renderItem = ({ item }) => (
-    //     <Image
-    //         key={item.id}
-    //         source={{ uri: "https://i.imgur.com/" + item.name + ".jpeg" }}
-    //         style={styles.image}
-    //     />
-    // );
-
-    // useEffect(() => {
-    //     (async () => {
-    //         const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //         // setPermission(status === 'granted');
-    //     })();
-    // }, []);
+    const refreshData = async () => {
+        setFilteredItems(outfitItems); // מחזיר את כל האייטמים
+        if (filterRef.current) {
+            filterRef.current.resetFilters(); // קריאה לפונקציה resetFilters
+        }
+    };
 
     // פונקציה להפחתת גודל התמונה כך שתהיה קרובה ל-2MB
     const reduceImageSize = async (uri) => {
@@ -90,9 +86,8 @@ function Wardrobe() {
         // פתיחת הגלריה ובחירת תמונה
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            // allowsEditing: true,
+            allowsEditing: true,
             // aspect: [4, 3],
-            allowsEditing: false, // לא מאפשר עריכת התמונה
             quality: 1,
         });
 
@@ -119,7 +114,7 @@ function Wardrobe() {
 
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
+            allowsEditing: true,
             quality: 1,
         });
 
@@ -203,6 +198,7 @@ function Wardrobe() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Wardrobe</Text>
+            <RefreshButton onRefresh={refreshData} />
 
             {modalVisible && (
                 <Modal
@@ -248,9 +244,17 @@ function Wardrobe() {
                     </View>
                 </Modal>
             )}
+            {/* הוספת קומפוננטת סינון */}
+            <OutfitFilter ref={filterRef} outfitItems={outfitItems} onFilter={handleFilter} />
+            {
+                filteredItems.length === 0 ? (
+                    <View style={styles.centeredContainer}>
+                        <Text style={styles.noItemsText}>No items available ...</Text>
+                    </View>                ) : (
+                    <ImageList outfitItems={filteredItems} setOutfitItems={setOutfitItems} />
+                )
+            }
 
-            {/* Use the ImageList component */}
-            <ImageList outfitItems={outfitItems} setOutfitItems={setOutfitItems} />
             <StatusBar style="auto" />
 
             {/* כפתור בחירת תמונה */}
@@ -381,6 +385,16 @@ const styles = StyleSheet.create({
     },
     loader: {
         marginBottom: 20,
+    },
+    centeredContainer: {
+        flex: 1,
+        justifyContent: 'center', // ממרכז את הטקסט אנכית
+        alignItems: 'center', // ממרכז את הטקסט אופקית
+        marginTop: -50,
+    },
+    noItemsText: {
+        fontSize: 20, // מגדיל את גודל הפונט
+        fontWeight: 'bold', // מדגיש את הטקסט
     },
 });
 

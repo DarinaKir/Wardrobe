@@ -9,7 +9,7 @@ import FormField from "../../components/FormField";
 import axios from 'axios';
 import {serverConstants} from '../../constants/serverConstants'
 import {errorMessages} from "../../constants/errorMessages";
-import {useGlobalContext} from "../contex/globalProvider";
+import {useGlobalContext} from "../../context/GlobalProvider";
 
 const SignUp = () => {
     const [isSubmitting, setSubmitting] = useState(false);

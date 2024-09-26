@@ -91,14 +91,16 @@ const ImageList = ({ outfitItems, setOutfitItems }) => {
     };
 
     return (
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{ flex: 1, alignItems: 'flex-start', justifyContent: 'center' }}>
             <FlatList
-                key={numColumns} // Add key prop based on numColumns
+                key={numColumns}
                 data={outfitItems}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 numColumns={numColumns}
                 contentContainerStyle={styles.imageList}
+                // הגדרת גובה קבוע ל-FlatList
+                style={{ flexGrow: 1 }} // מאפשר ל-FlatList לגדול על פי התוכן
             />
 
             <Modal visible={modalVisible} transparent={true}>
@@ -162,6 +164,7 @@ const styles = StyleSheet.create({
     imageList: {
         // justifyContent: 'center',
         alignItems: 'flex-start',
+        paddingBottom: 20, // מרווח בתחתית
     },
     modalContainer: {
         flex: 1,
