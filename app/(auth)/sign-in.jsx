@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image, StyleSheet } from "react-native";
@@ -9,16 +9,23 @@ import FormField from "../../components/FormField";
 import axios from "axios";
 import {errorMessages} from '../../constants/errorMessages'
 import {serverConstants} from '../../constants/serverConstants'
-import {useGlobalContext} from "../contex/globalProvider";
+import { useGlobalContext } from "../../context/GlobalProvider";
 
 
 const SignIn = () => {
+    const {user, setUser} = useGlobalContext();
     const [isSubmitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
-        email: "",
-        password: "",
+        email: "Tehila1355@gmail.com",
+        password: "123",
     });
-    const { setUser, setIsLogged } = useGlobalContext();
+
+    useEffect(() => {
+        if (user) {
+            console.log("connected")
+            router.replace("/home");
+        }
+    }, []);
 
     const submit = async () => {
         if (form.email && form.password) {
@@ -34,8 +41,7 @@ const SignIn = () => {
                 console.log(response.data);
 
                 if (response.data.success) {
-                    setUser(response.data.user);
-                    setIsLogged(true);
+                    setUser(response.data.user)
                     router.replace("/home");
                 } else {
                     if (errorMessages[response.data.errorCode]) {

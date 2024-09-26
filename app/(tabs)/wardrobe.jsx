@@ -7,7 +7,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import {useGlobalContext} from "../contex/globalProvider";
+import {useGlobalContext} from "../../context/GlobalProvider";
 
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';

@@ -1,64 +1,178 @@
-import {Alert, StyleSheet, Text, View, TextInput} from 'react-native';
+import {Alert, StyleSheet, Text, View, TextInput,FlatList} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {serverConstants} from "../../constants/serverConstants";
 import CustomButton from "../../components/CustomButton";
+import {useGlobalContext} from "../../context/GlobalProvider";
+
 
 function Outfits() {
     const [selectedOption, setSelectedOption] = useState("");
     const [suggestions, setSuggestions] = useState([]);
-    const occasionOptions = ["Vacation","Party","Date","Studies"];
-
+    const occasionOptions = ["Vacation", "Party", "Date", "Studies"];
+    const typeOfStyle = ["Elegant", "Casual", "Bohemian", "Formal"]
+    const [selectedStyles, setSelectedStyles] = useState("")
+    const {user} = useGlobalContext();
+    const [names, setNames] = useState([])
 
     const handleSelectItem = async (occasion) => {
         Alert.alert("Option selected", `You selected: ${occasion}`);
         console.log(occasion)
-
         try {
-            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-outfit-suggestions", {
-                occasion: selectedOption
-            });
+            const response = await axios.post("http://" + serverConstants.serverIp + ":" + serverConstants.port + "/get-outfit-suggestions", null,
+                {
+                    params: {
+                        occasion: selectedOption,
+                        userId: user.id.toString(),
+                        style:selectedStyles,
+                    }
+                });
             setSuggestions(response.data);
-            //console.log(suggestions);
-            Alert.alert("Suggestions received", `Suggestions: ${JSON.stringify(response.data)}`);
+            console.log(suggestions);
+            // Alert.alert("Suggestions received", `Suggestions: ${JSON.stringify(response.data)}`);
+            console.log(JSON.stringify(response.data))
 
+
+            const responseData = JSON.stringify(response.data);
+
+            const parsedData = JSON.parse(responseData);
+
+            const allNames = parsedData.map(outfitSet => {
+                return outfitSet.outfit.map(item => item.name);
+            });
+
+            setNames(allNames)
+            console.log(allNames);
+            setSelectedOption("")
+            setSelectedStyles("")
         } catch (error) {
             console.error('Error fetching suggestions:', error);
             Alert.alert("Error", "Failed to fetch suggestions from the server");
         }
     };
 
+    const selectStyle = (style) => {
+        if (selectedStyles.length === 0) {
+            setSelectedStyles(style)
+        }else {
+            if (selectedStyles.includes(style)) {
+                let words = selectedStyles.split('/');
+                words = words.filter(word => word !== style);
+                setSelectedStyles(words.join('/'));
+            }else {
+                setSelectedStyles(selectedStyles + "/" + style)
+            }
+        }
+    }
+    // יצירת URLs לתמונות עבור כל פריט
+    const generateImageUrls = (outfit) => {
+        return outfit.map(name => `https://i.imgur.com/${name}.jpeg`);
+    };
+
+    const OutfitItem = ({ imageUrl }) => (
+        <View style={styles.itemContainer}>
+            {/*<Image source={{ uri: imageUrl }} style={styles.image} />*/}
+            <Text>hi</Text>
+        </View>
+    );
+
+    const OutfitSuggestion = ({ outfit }) => {
+        const imageUrls = generateImageUrls(outfit);
+        return (
+            <View style={styles.outfitContainer}>
+                <FlatList
+                    horizontal
+                    data={imageUrls}
+                    renderItem={({ item }) => <OutfitItem imageUrl={item} />}
+                    keyExtractor={(item) => item}
+                    style={styles.outfitList}
+                />
+            </View>
+        );
+    };
     return (
         <SafeAreaView style={styles.container}>
-
             <Text style={styles.header}>Outfits</Text>
+            <Text style={styles.subtitle}>Where will you wear this outfit?</Text>
+
+            <View style={styles.buttonContainer}>
+                {
+                    occasionOptions.map((option, id) => {
+                        return <CustomButton key={id}
+                                             title={option}
+                                             handlePress={() => handleSelectItem(option)}
+                                             containerStyles={{
+                                                 margin: 5,
+                                                 minHeight: 10,
+                                                 alignSelf: 'flex-start',
+                                                 borderRadius: 0,
+                                                 borderTopRightRadius: 10,
+                                                 borderBottomRightRadius: 10,
+                                                 borderBottomLeftRadius: 10,
+                                                 backgroundColor: '#FFFFFF',
+                                                 borderWidth: 1,
+                                                 borderColor: '#b135c5'
+                                             }}
+                                             textStyles={{fontSize: 13, padding: 3, color: '#b135c5',}}/>
+                    })
+                }
+            </View>
 
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.textInput}
-                    placeholder="Where will you wear this outfit?"
+                    placeholder="type the occasion..."
                     onChangeText={newText => setSelectedOption(newText)}
                     value={selectedOption}
                 />
                 <CustomButton title="Submit"
-                              handlePress={()=> handleSelectItem(selectedOption)}
-                              containerStyles={{minHeight: 50,borderRadius: 0, borderTopRightRadius: 10, borderBottomRightRadius: 10}}
-                              textStyles={{fontSize: 13, padding:2}}/>
+                              handlePress={() => handleSelectItem(selectedOption)}
+                              containerStyles={{
+                                  minHeight: 50,
+                                  borderRadius: 0,
+                                  borderTopRightRadius: 10,
+                                  borderBottomRightRadius: 10
+                              }}
+                              textStyles={{fontSize: 13, padding: 2}}
+                />
             </View>
 
+
             <View style={styles.buttonContainer}>
-            {
-                occasionOptions.map((option,id) => {
-                    return <CustomButton key={id}
-                                         title={option}
-                                         handlePress={()=> handleSelectItem(option)}
-                                         containerStyles={{margin: 5,minHeight: 10,alignSelf: 'flex-start',borderRadius: 0, borderTopRightRadius: 10, borderBottomRightRadius: 10,borderBottomLeftRadius: 10, backgroundColor:'#FFFFFF',borderWidth: 1, borderColor: '#b135c5'}}
-                                         textStyles={{fontSize: 13, padding:3,color: '#b135c5',}}/>
-                })
-            }
+                {
+                    typeOfStyle.map((option, id) => {
+                        return <CustomButton key={id}
+                                             title={option}
+                                             handlePress={() => selectStyle(option)}
+                                             containerStyles={{
+                                                 margin: 5,
+                                                 minHeight: 10,
+                                                 alignSelf: 'flex-start',
+                                                 borderRadius: 0,
+                                                 borderTopRightRadius: 10,
+                                                 borderBottomRightRadius: 10,
+                                                 borderBottomLeftRadius: 10,
+                                                 borderTopLeftRadius: 10,
+                                                 backgroundColor: selectedStyles.includes(option) ? '#ebebeb' : '#FFFFFF',
+                                                 borderWidth: 2,
+                                                 borderColor: selectedStyles.includes(option) ? '#c4b29b' : '#E2D0B9'
+                                             }}
+                                             textStyles={{fontSize: 13, padding: 3, color: '#E2D0B9',}}/>
+                    })
+                }
             </View>
             {/*<Text>{suggestions}</Text>*/}
+
+
+            {
+                names.length !== 0 &&
+                <FlatList
+                    data={names}
+                    renderItem={({ item }) => <OutfitSuggestion outfit={item} />}
+                    keyExtractor={(item, index) => index.toString()}
+                />
+            }
         </SafeAreaView>
     );
 }
@@ -73,6 +187,10 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 24,
         fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 16,
         marginBottom: 10,
     },
     table: {
@@ -111,11 +229,32 @@ const styles = StyleSheet.create({
         height: 50,
         borderColor: '#b135c5',
         borderWidth: 1,
-        fontSize:15,
+        fontSize: 15,
         paddingHorizontal: 10,
-        borderBottomLeftRadius:10,
+        borderBottomLeftRadius: 10,
         // borderTopLeftRadius:10,
     },
+
+
+    outfitContainer: {
+        marginVertical: 20,
+        paddingHorizontal: 10,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 10,
+        padding: 10,
+    },
+    itemContainer: {
+        marginRight: 10,
+        alignItems: 'center',
+    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+    },
+    outfitList: {
+        flexDirection: 'row',
+    }
 });
 
 export default Outfits
