@@ -106,7 +106,7 @@ const ImageList = ({ outfitItems, setOutfitItems }) => {
             <Modal visible={modalVisible} transparent={true}>
                 <View style={styles.modalContainer}>
                     <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                        <MaterialIcons name="close" size={40} color="white" />
+                        <MaterialIcons name="close" size={40} color='rgba(255,255,255,0.7)' />
                     </TouchableOpacity>
 
                     {outfitItems.length > 0 && (
@@ -119,7 +119,7 @@ const ImageList = ({ outfitItems, setOutfitItems }) => {
 
                     {/* Delete Button */}
                     <TouchableOpacity style={styles.deleteButton} onPress={confirmDelete}>
-                        <MaterialIcons name="delete" size={40} color="red" />
+                        <MaterialIcons name="delete" size={40} color="white" />
                     </TouchableOpacity>
 
                     <View style={styles.navigationContainer}>
@@ -180,7 +180,8 @@ const styles = StyleSheet.create({
     closeButton: {
         position: 'absolute',
         top: 30,
-        right: 12,
+        // right: 35,
+        left: 33,
         zIndex: 1,
     },
     navigationContainer: {
@@ -199,13 +200,28 @@ const styles = StyleSheet.create({
         width: 60,
         alignItems: 'center',
         padding: 10,
-        backgroundColor: '#fff', // חצים על רקע בהיר
+        backgroundColor: 'rgba(255,255,255,0.31)', // חצים על רקע בהיר
         borderRadius: 30, // עיגול לפינות הכפתור
         opacity: 0.8,
         shadowColor: '#000',
         shadowOpacity: 0.3,
         shadowOffset: { width: 1, height: 2 },
         shadowRadius: 3,
+    },
+    deleteButton: {
+        position: 'absolute',
+        bottom: 30, // שינוי המיקום לפי הצורך
+        backgroundColor: 'rgba(255, 0, 0, 0.5)', // צבע אדום עם שקיפות
+        padding: 15,
+        borderRadius: 30, // עיגול לפינות
+        shadowColor: '#000',
+        shadowOpacity: 0.5,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 100, // רוחב קבוע
+        alignSelf: 'center', // למרכז את הכפתור
     },
 });
 

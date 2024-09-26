@@ -1,4 +1,4 @@
-import {Alert, StyleSheet, Text, View, TextInput, FlatList, Image, Modal, ActivityIndicator} from 'react-native';
+import {Alert, StyleSheet, Text, View, TextInput, FlatList, Image, Modal, ActivityIndicator, Animated} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
@@ -14,7 +14,7 @@ function Outfits() {
     const occasionOptions = ["Vacation", "Party", "Date", "Studies"];
     const typeOfStyle = ["Elegant", "Casual", "Bohemian", "Formal"]
     const [selectedStyles, setSelectedStyles] = useState("")
-    const {user} = useGlobalContext();
+    const {user, outfitItems} = useGlobalContext();
     const [names, setNames] = useState([]);
     const [loading, setLoading] = useState(false); // מצב טעינה
 
@@ -46,10 +46,10 @@ function Outfits() {
                 return outfitSet.outfit.map(item => item.name);
             });
 
-            setNames(allNames)
+            setNames(allNames);
             console.log(allNames);
-            setSelectedOption(occasion)
-            setSelectedStyles("")
+            setSelectedOption(occasion);
+            setSelectedStyles("");
         } catch (error) {
             console.error('Error fetching suggestions:', error);
             Alert.alert("Error", "Failed to fetch suggestions from the server");
@@ -308,4 +308,3 @@ const styles = StyleSheet.create({
 });
 
 export default Outfits
-

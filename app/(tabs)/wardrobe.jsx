@@ -40,12 +40,13 @@ function Wardrobe() {
                     { params: {userId: user.id.toString()} }
                 );
                 setOutfitItems(response.data);
+                setFilteredItems(response.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
         fetchData();
-    }, [imageUri]);
+    }, [imageUri, outfitItems]);
 
     const refreshData = async () => {
         setFilteredItems(outfitItems); // מחזיר את כל האייטמים
