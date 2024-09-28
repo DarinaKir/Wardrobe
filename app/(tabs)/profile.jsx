@@ -25,6 +25,7 @@ function Profile() {
     const [isEmailDisabled, setIsEmailDisabled] = useState(false);
     const [isPasswordDisabled, setIsPasswordDisabled] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
+    const [isModified, setIsModified] = useState(false);
 
 
     const onTextChange = (fieldName, value) => {
@@ -52,11 +53,14 @@ function Profile() {
         if (Object.values(newUser).some(value => value)) {
             setSubmitting(true);
             try {
-                const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/`, null, {
+                const response = await axios.post(`http://${serverConstants.serverIp}:${serverConstants.port}/modify-user`, null, {
                     params: {
-                        email: newUser.email,
-                        password: newUser.password,
-                        username: newUser.username,
+                        //backend does not recognize sending 'user' directly, so we send its field
+                        username: user.username,
+                        //new fields to be updated if not empty
+                        newEmail: newUser.email,
+                        newPassword: newUser.password,
+                        newUsername: newUser.username,
                     }
                 });
 
@@ -64,7 +68,9 @@ function Profile() {
 
                 if (response.data.success) {
                     setUser(response.data.user)
+                    setIsModified(true);
                     console.log("user updated successfully!")
+
                 } else {
                     if (errorMessages[response.data.errorCode]) {
                         Alert.alert('Error', errorMessages[response.data.errorCode]);
@@ -159,6 +165,15 @@ function Profile() {
                                 />
                             </View>
 
+                            {
+                                isModified && (
+                                    <View>
+                                        <Text style={styles.submitText}>
+                                            Your account details have been updated successfully!
+                                        </Text>
+                                    </View>
+                                )
+                            }
                         </>
                     )
                 }
@@ -201,7 +216,10 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         marginTop: 15,
-    }
+    },
+    submitText: {
+        marginTop: 10,
+    },
 
 });
 
