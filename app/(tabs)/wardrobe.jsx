@@ -46,7 +46,7 @@ function Wardrobe() {
             }
         };
         fetchData();
-    }, [imageUri, outfitItems]);
+    }, [imageUri, setOutfitItems]);
 
     const refreshData = async () => {
         setFilteredItems(outfitItems); // מחזיר את כל האייטמים

@@ -94,7 +94,7 @@ function Profile() {
             <ScrollView>
                 <Text style={styles.header}>
                     Hello, {user.username}!</Text>
-                <Text> Here you can customize and manage your account easily. </Text>
+                <Text>Here you can customize and manage your account easily.</Text>
 
                 <TouchableOpacity onPress={handlePress}>
                     <Text style={styles.details_button}>

@@ -1,6 +1,6 @@
 import {Alert, StyleSheet, Text, View, TextInput, FlatList, Image, Modal, ActivityIndicator, Animated} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {serverConstants} from "../../constants/serverConstants";
 import CustomButton from "../../components/CustomButton";
@@ -14,9 +14,11 @@ function Outfits() {
     const occasionOptions = ["Vacation", "Party", "Date", "Studies"];
     const typeOfStyle = ["Elegant", "Casual", "Bohemian", "Formal"]
     const [selectedStyles, setSelectedStyles] = useState("")
-    const {user, outfitItems} = useGlobalContext();
+    const {user} = useGlobalContext();
     const [names, setNames] = useState([]);
     const [loading, setLoading] = useState(false); // מצב טעינה
+    const [isAnimating, setIsAnimating] = useState(false); // מצב לאנימציה
+
 
 
     const handleSelectItem = async (occasion) => {
@@ -48,7 +50,7 @@ function Outfits() {
 
             setNames(allNames);
             console.log(allNames);
-            setSelectedOption(occasion);
+            setSelectedOption(occasion + " " + ((selectedStyles !== "") ? ("(" + selectedStyles + ")") : ""));
             setSelectedStyles("");
         } catch (error) {
             console.error('Error fetching suggestions:', error);
@@ -78,15 +80,51 @@ function Outfits() {
 
     const OutfitItem = ({ imageUrl }) => (
         <View style={styles.itemContainer}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <Image source={{ uri: imageUrl }} style={styles.image}  resizeMode="contain"/>
             {/*<Text>hi</Text>*/}
         </View>
     );
 
+    // const OutfitSuggestion = ({ outfit }) => {
+    //     const imageUrls = generateImageUrls(outfit);
+    //     return (
+    //         <View style={styles.outfitContainer}>
+    //             <FlatList
+    //                 horizontal
+    //                 data={imageUrls}
+    //                 renderItem={({ item }) => <OutfitItem imageUrl={item} />}
+    //                 keyExtractor={(item) => item}
+    //                 style={styles.outfitList}
+    //             />
+    //         </View>
+    //     );
+    // };
+
     const OutfitSuggestion = ({ outfit }) => {
+        const scaleAnim = useRef(new Animated.Value(0.5)).current; // אנימציה לשינוי גודל (scale)
+
+        useEffect(() => {
+            // הרצאה של האנימציות בצורה מדורגת
+            Animated.sequence([
+                Animated.spring(scaleAnim, {
+                    toValue: 1,
+                    friction: 5, // אפקט ריבאונד קל
+                    useNativeDriver: true,
+                })
+            ]).start();
+        }, []);
+
         const imageUrls = generateImageUrls(outfit);
+
         return (
-            <View style={styles.outfitContainer}>
+            <Animated.View
+                style={[
+                    styles.outfitContainer,
+                    {
+                        transform: [{ scale: scaleAnim }], // שינוי גודל הדרגתי
+                    }
+                ]}
+            >
                 <FlatList
                     horizontal
                     data={imageUrls}
@@ -94,7 +132,7 @@ function Outfits() {
                     keyExtractor={(item) => item}
                     style={styles.outfitList}
                 />
-            </View>
+            </Animated.View>
         );
     };
 
@@ -150,7 +188,7 @@ function Outfits() {
                                   borderTopRightRadius: 10,
                                   borderBottomRightRadius: 10
                               }}
-                              textStyles={{fontSize: 13, padding: 2}}
+                              textStyles={{fontSize: 13, padding: 5}}
                 />
             </View>
 
