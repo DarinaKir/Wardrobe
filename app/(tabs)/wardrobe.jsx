@@ -183,7 +183,11 @@ function Wardrobe() {
             setImageUri(null);
             setIsUploading(false); // סיום טעינה
             console.log('Image uploaded successfully,URL:', res);
-            Alert.alert("Image uploaded successfully");
+            Alert.alert(
+                "Image Upload",
+                "Your image has been uploaded successfully!",
+                [{ text: "OK", style: "default" }]
+            );
         } catch (error) {
             setIsUploading(false); // סיום טעינה
             if (error.response) {
@@ -224,11 +228,14 @@ function Wardrobe() {
                                         resizeMode="contain"
                                     />
                                     {isUploading ? (
-                                        <ActivityIndicator
-                                            size="large"
-                                            color="#565867"
-                                            style={[{ transform: [{ scale: 1.2 }] }]} // גם כאן האייקון מוגדל
-                                        />
+                                        <View style={styles.loaderContainer}>
+                                            <ActivityIndicator
+                                                size="large"
+                                                color="#565867"
+                                                style={[{ transform: [{ scale: 1.2 }] }]} // גם כאן האייקון מוגדל
+                                            />
+                                            <Text style={styles.loadingText}>Uploading ...</Text>
+                                        </View>
                                     ) : (
                                         <View style={styles.buttonContainer}>
                                             <TouchableOpacity onPress={deleteImage} style={styles.deleteButton}>

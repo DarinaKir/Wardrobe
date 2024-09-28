@@ -13,7 +13,7 @@ const RefreshButton = ({ onRefresh }) => {
 const styles = StyleSheet.create({
     button: {
         position: 'absolute',
-        top: 40,       // מיקום למעלה
+        top: 35,       // מיקום למעלה
         right: 10,     // מיקום מימין
         // backgroundColor: '#a96cf8', // צבע הכפתור
         padding: 10,
