@@ -13,8 +13,6 @@ import ImageList from "../../components/ImageList";
 import OutfitFilter from "../../components/OutfitFilter";
 import RefreshButton from "../../components/RefreshButton";
 
-
-
 function Wardrobe() {
     const [outfitItems, setOutfitItems] = useState([]);
     const [imageUri, setImageUri] = useState(null); // משתנה לשמירת URI של התמונה שנבחרה

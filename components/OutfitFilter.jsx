@@ -70,7 +70,7 @@ const OutfitFilter = React.forwardRef(({ outfitItems, onFilter }, ref) => {
                         <Picker.Item style={styles.pickerItem} label="All Types" value="" />
                         {outfitItems.length > 0 && (
                             uniqueTypes.map(type => (
-                                <Picker.Item key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
+                                <Picker.Item style={styles.pickerItem} key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
                             ))
                         )}
                     </Picker>
@@ -85,7 +85,7 @@ const OutfitFilter = React.forwardRef(({ outfitItems, onFilter }, ref) => {
                         <Picker.Item style={styles.pickerItem} label="All Styles" value="" />
                         {outfitItems.length > 0 && (
                             uniqueStyles.map(style => (
-                                <Picker.Item key={style} label={style.charAt(0).toUpperCase() + style.slice(1)} value={style} />
+                                <Picker.Item style={styles.pickerItem} key={style} label={style.charAt(0).toUpperCase() + style.slice(1)} value={style} />
                             ))
                         )}
                     </Picker>
@@ -102,7 +102,7 @@ const OutfitFilter = React.forwardRef(({ outfitItems, onFilter }, ref) => {
                         <Picker.Item style={styles.pickerItem} label="All Colors" value="" />
                         {outfitItems.length > 0 && (
                             uniqueColors.map(color => (
-                                <Picker.Item key={color} label={color.charAt(0).toUpperCase() + color.slice(1)} value={color} />
+                                <Picker.Item style={styles.pickerItem} key={color} label={color.charAt(0).toUpperCase() + color.slice(1)} value={color} />
                             ))
                         )}
                     </Picker>
@@ -117,7 +117,7 @@ const OutfitFilter = React.forwardRef(({ outfitItems, onFilter }, ref) => {
                         <Picker.Item style={styles.pickerItem} label="All Seasons" value="" />
                         {outfitItems.length > 0 && (
                             uniqueSeasons.map(season => (
-                                <Picker.Item key={season} label={season.charAt(0).toUpperCase() + season.slice(1)} value={season} />
+                                <Picker.Item style={styles.pickerItem} key={season} label={season.charAt(0).toUpperCase() + season.slice(1)} value={season} />
                             ))
                         )}
                     </Picker>
@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     pickerContainer: {
         flex: 1,
         marginHorizontal: 3,
+
     },
     picker: {
         height: 50,
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     pickerItem: {
-        fontSize: 12,
+        fontSize: 14,
     },
 });
 
