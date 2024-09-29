@@ -25,11 +25,11 @@ function Welcome() {
                         <Text style={styles.subtitle}>
                             Discover Endless{"\n"}
                             Possibilities with{" "}
-                            <Text style={styles.highlight}>Wardrobe</Text>
+                            <Text style={styles.highlight}>ChicPick</Text>
                         </Text>
 
                         <Text style={styles.description}>
-                            Unleash Your Style: Discover Endless Outfit Combinations with Wardrobe
+                            Unleash Your Style: Discover Endless Outfit Combinations with ChicPick
                         </Text>
                         <CustomButton
                             title="Continue with Email"
@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     logo: {
-        width: 300,
-        height: 60,
+        width: 200,
+        height: 100,
     },
     image: {
         maxWidth: 380,

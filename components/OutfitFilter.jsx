@@ -58,84 +58,96 @@ const OutfitFilter = React.forwardRef(({ outfitItems, onFilter }, ref) => {
             setSelectedSeason('');
         }
     }));
-
     return (
-        <View style={styles.container}>
-            <Picker
-                selectedValue={selectedType}
-                onValueChange={itemValue => setSelectedType(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="All Types" value="" />
-                {outfitItems.length > 0 && (
-                    uniqueTypes.map(type => (
-                        <Picker.Item key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
-                    ))
-                )}
-            </Picker>
+        <View style={{ marginBottom: 10 }}>
+            <View style={styles.row}>
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={selectedType}
+                        onValueChange={itemValue => setSelectedType(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item style={styles.pickerItem} label="All Types" value="" />
+                        {outfitItems.length > 0 && (
+                            uniqueTypes.map(type => (
+                                <Picker.Item key={type} label={type.charAt(0).toUpperCase() + type.slice(1)} value={type} />
+                            ))
+                        )}
+                    </Picker>
+                </View>
 
-            <Picker
-                selectedValue={selectedStyle}
-                onValueChange={itemValue => setSelectedStyle(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="All Styles" value="" />
-                {outfitItems.length > 0 && (
-                    uniqueStyles.map(style => (
-                        <Picker.Item key={style} label={style.charAt(0).toUpperCase() + style.slice(1)} value={style} />
-                    ))
-                )}
-            </Picker>
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={selectedStyle}
+                        onValueChange={itemValue => setSelectedStyle(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item style={styles.pickerItem} label="All Styles" value="" />
+                        {outfitItems.length > 0 && (
+                            uniqueStyles.map(style => (
+                                <Picker.Item key={style} label={style.charAt(0).toUpperCase() + style.slice(1)} value={style} />
+                            ))
+                        )}
+                    </Picker>
+                </View>
+            </View>
 
-            <Picker
-                selectedValue={selectedColor}
-                onValueChange={itemValue => setSelectedColor(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="All Colors" value="" />
-                {outfitItems.length > 0 && (
-                    uniqueColors.map(color => (
-                        <Picker.Item key={color} label={color.charAt(0).toUpperCase() + color.slice(1)} value={color} />
-                    ))
-                )}
-            </Picker>
+            <View style={styles.row}>
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={selectedColor}
+                        onValueChange={itemValue => setSelectedColor(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item style={styles.pickerItem} label="All Colors" value="" />
+                        {outfitItems.length > 0 && (
+                            uniqueColors.map(color => (
+                                <Picker.Item key={color} label={color.charAt(0).toUpperCase() + color.slice(1)} value={color} />
+                            ))
+                        )}
+                    </Picker>
+                </View>
 
-            <Picker
-                selectedValue={selectedSeason}
-                onValueChange={itemValue => setSelectedSeason(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="All Seasons" value="" />
-                {outfitItems.length > 0 && (
-                    uniqueSeasons.map(season => (
-                        <Picker.Item key={season} label={season.charAt(0).toUpperCase() + season.slice(1)} value={season} />
-                    ))
-                )}
-            </Picker>
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={selectedSeason}
+                        onValueChange={itemValue => setSelectedSeason(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item style={styles.pickerItem} label="All Seasons" value="" />
+                        {outfitItems.length > 0 && (
+                            uniqueSeasons.map(season => (
+                                <Picker.Item key={season} label={season.charAt(0).toUpperCase() + season.slice(1)} value={season} />
+                            ))
+                        )}
+                    </Picker>
+                </View>
+            </View>
         </View>
     );
+
 });
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 16, // ריווח פנימי
-        backgroundColor: '#f9f9f9', // צבע רקע בהיר
-        borderRadius: 8, // פינות מעוגלות
-        shadowColor: '#000', // צבע הצל
-        shadowOffset: { width: 0, height: 2 }, // מיקום הצל
-        shadowOpacity: 0.1, // שקיפות הצל
-        shadowRadius: 4, // רדיוס הצל
-        elevation: 2, // למכשירים אנדרואיד
-        marginBottom: 10,
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    pickerContainer: {
+        flex: 1,
+        marginHorizontal: 3,
     },
     picker: {
-        height: 50, // גובה ה-Picker
-        width: '100%', // רוחב מלא
-        marginBottom: 12, // ריווח בין ה-Pickers
-        borderWidth: 1, // גבול
-        borderColor: '#ccc', // צבע הגבול
-        borderRadius: 5, // פינות מעוגלות לגבול
-        backgroundColor: '#fff', // צבע רקע של ה-Picker
+        height: 50,
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        backgroundColor: '#fff',
+    },
+    pickerItem: {
+        fontSize: 12,
     },
 });
 

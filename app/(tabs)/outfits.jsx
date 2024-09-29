@@ -192,7 +192,7 @@ function Outfits() {
                 />
             </View>
 
-
+            <Text style={styles.subtitle}>you can choose style..</Text>
             <View style={styles.buttonContainer}>
                 {
                     typeOfStyle.map((option, id) => {
@@ -200,19 +200,15 @@ function Outfits() {
                                              title={option}
                                              handlePress={() => selectStyle(option)}
                                              containerStyles={{
-                                                 margin: 5,
+                                                 margin: 4,
                                                  minHeight: 10,
                                                  alignSelf: 'flex-start',
-                                                 borderRadius: 0,
-                                                 borderTopRightRadius: 10,
-                                                 borderBottomRightRadius: 10,
-                                                 borderBottomLeftRadius: 10,
-                                                 borderTopLeftRadius: 10,
-                                                 backgroundColor: selectedStyles.includes(option) ? '#ebebeb' : '#FFFFFF',
+                                                 borderRadius: 3,
+                                                 backgroundColor: selectedStyles.includes(option) ? 'rgba(255, 255, 255, 0.0)' : 'rgba(255, 255, 255, 0.0)',
                                                  borderWidth: 2,
-                                                 borderColor: selectedStyles.includes(option) ? '#c4b29b' : '#E2D0B9'
+                                                 borderColor: selectedStyles.includes(option) ? '#000000' : '#969696'
                                              }}
-                                             textStyles={{fontSize: 13, padding: 3, color: '#E2D0B9',}}/>
+                                             textStyles={{fontSize: 13, padding: 3, color: selectedStyles.includes(option) ? '#000000' : '#969696',}}/>
                     })
                 }
             </View>

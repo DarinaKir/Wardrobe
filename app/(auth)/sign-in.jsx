@@ -70,14 +70,17 @@ const SignIn = () => {
         <SafeAreaView style={styles.container}>
             <ScrollView>
                 <View style={styles.innerContainer}>
-                    <Image
-                        source={images.logo}
-                        resizeMode="contain"
-                        style={styles.logo}
-                    />
+                    <View style={styles.logoContainer}>
+                        <Image
+                            source={images.logo}
+                            resizeMode="contain"
+                            style={styles.logo}
+                        />
+                    </View>
+
 
                     <Text style={styles.title}>
-                        Log in to Wardrobe
+                        Log in to ChicPick
                     </Text>
 
                     <FormField
@@ -128,9 +131,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginVertical: 24,
     },
+    logoContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     logo: {
-        width: 200,
-        height: 40,
+        width: 150,
+        height: 80,
     },
     title: {
         fontSize: 24,
