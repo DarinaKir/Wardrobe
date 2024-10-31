@@ -19,11 +19,11 @@ const SignIn = () => {
         // email: "Tehila1355@gmail.com",
         // password: "12345678",
 
-        email: "dasha23kir@gmail.com",
-        password: "Aa123456",
+        // email: "dasha23kir@gmail.com",
+        // password: "Aa123456",
 
-        // email: "",
-        // password: "",
+        email: "",
+        password: "",
     });
 
     useEffect(() => {

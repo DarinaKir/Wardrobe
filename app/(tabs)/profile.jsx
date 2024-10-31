@@ -25,7 +25,6 @@ function Profile() {
     const [isEmailDisabled, setIsEmailDisabled] = useState(false);
     const [isPasswordDisabled, setIsPasswordDisabled] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
-    const [isModified, setIsModified] = useState(false);
     const [greeting, setGreeting] = useState('Hello');
 
     useEffect(() => {
@@ -81,9 +80,16 @@ function Profile() {
 
                 if (response.data.success) {
                     setUser(response.data.user)
-                    setIsModified(true);
                     console.log("user updated successfully!")
-
+                    Alert.alert('Account Updated', "Your account details have been updated successfully!");
+                    setNewUser({
+                        username: "",
+                        email: "",
+                        password: "",
+                    });
+                    setIsEmailDisabled(false);
+                    setIsPasswordDisabled(false);
+                    setIsUsernameDisabled(false);
                 } else {
                     if (errorMessages[response.data.errorCode]) {
                         Alert.alert('Error', errorMessages[response.data.errorCode]);
@@ -206,14 +212,6 @@ function Profile() {
                                     isLoading={isSubmitting}
                                 />
                             </View>
-
-                            {isModified && (
-                                <View>
-                                    <Text style={styles.submitText}>
-                                        Your account details have been updated successfully!
-                                    </Text>
-                                </View>
-                            )}
                         </>
                     )}
                 </ScrollView>
